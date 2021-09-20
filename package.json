@@ -1,0 +1,34 @@
+{
+  "name": "@com-pot/treasure-hunt",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon -r dotenv/config --ignore test/* src/app.js",
+    "test": "mocha -r test/boot.js",
+    "test-all": "npm run test  src/**/*.spec.js",
+
+    "e2e": "mocha -r dotenv/config -r test/boot.js dotenv_config_path=./e2e.env",
+    "e2e-all": "npm run e2e test/e2e/**/*.spec.js"
+  },
+  "author": "Thoronir42@Gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "@koa/cors": "^3.1.0",
+    "@koa/router": "^10.1.1",
+    "bcrypt": "^5.0.1",
+    "dotenv": "^10.0.0",
+    "esm": "^3.2.25",
+    "glob": "^7.1.7",
+    "jsonwebtoken": "^8.5.1",
+    "koa": "^2.13.1",
+    "koa-bodyparser": "^4.3.0",
+    "lodash": "^4.17.21",
+    "mongodb": "^4.1.2"
+  },
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "mocha": "^9.1.1",
+    "nodemon": "^2.0.12"
+  }
+}
