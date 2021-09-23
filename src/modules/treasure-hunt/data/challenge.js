@@ -8,9 +8,9 @@ export default {
             challengeConfig: {
                 options: ["drink","walk","deer","sleep","grass","bison","horse","see","baby","eat"],
             },
+            checkSum: '3',
             onError: [
                 ['message', "Ale né musíme to zkusit znova!"],
-                ['gameState', "reset"],
             ],
         },
         {
@@ -19,13 +19,14 @@ export default {
             description: "Ted se potřebuje spřátelit s indiány a tak by bylo dobré, kdyby projevil úctu a správně dívku oslovil jménem. Ovšem při všem tom včerejším učení její jméno zapomenul. Tvá paměť určitě ale není tak krátká jako Tedova a určitě mu budeš umět do ucha pošeptat jméno indiánské dívky.",
             type: 'password',
             challengeConfig: {prompt: "Jak se jen jmenuje??"},
+            checkSum: '71f1b779',
             onError: [
                 ['message', "Ne ne! To není ono musíš si vzpomenout, jak se jmenovala !"],
                 ['gameState', "reset"],
             ],
         },
         {
-            id: 'stow.ch-3.reipe',
+            id: 'sotw.ch-3.reipe',
             name: "Recept",
             description: "Dění kolem Teda pohltilo veškerou tvou pozornost. Takže odjezd lovců unikl tvé pozornosti. Je ti ho ale líto a proto se mu rozhodneš s hádankou pomoci.\n\nVíš že: Odjelo 22 hlav 72 nohou. Kůry musí dát tolik špetek, kolik jelo lovců. Počet koní je počet květů, které musí přidat a kolik mají koně celkem nohou tolik špetek lišejníku.",
             type: 'bpc',
@@ -36,6 +37,7 @@ export default {
                     {name: 'moss', caption: "Kousků lišejníku"},
                 ],
             },
+            checkSum: '744b18',
             onError: [
                 ['message', "Instinkt ti říká, že tohle není správně. Musíš se víc soustředit! Špatný poměr by Teda mohl zabít!"],
             ],
@@ -46,6 +48,7 @@ export default {
             description: "Víš, že autor použil název „Příběh Byla Naprdla“ . Což opravdu nezní jako indiánské jméno. V tom ti to dojde, indiáni jméno přece neskloňují. Takže né „Byla Naprdla“, ale „Byl Naprdlo“. Šaman taky říkal, že tohle jméno vytvořil z původního překladu indiánského jména. Takže pokud si pohraješ s písmeny a správně je přeskládáš, měl by jsi být schopen přijít na pravé čestné jméno které si indián vysloužil . Postupně zapisuj písmena z posměšného jména a nezapomeň oddělit jednotlivé časti jména mezerou.",
             type: 'anagram',
             challengeConfig: {inputText: 'byl naprdlo', outputLength: 'byl naprdlo '.length,  check: '28f185a6'},
+            checkSum: '44d2f8c9',
             onError: [
                 ['message', "Tohle nezní úplně správně možná to budu muset ještě trochu zpřeházet nebo změnit pořadí ?"],
             ],
@@ -84,6 +87,7 @@ export default {
                     ],
                 },
             },
+            checkSum: '253cebd1',
             onError: [
                 ['message', "Musel jsem to poplést. Radši to překontroluji"],
             ],
@@ -94,14 +98,23 @@ export default {
             description: "Ted se nemůže ani pohnout, takže je to opět na tobě mu pomoci. Musíš se rozeběhnout po mlžném městě a najít desky s hvězdami, které patří třem válečníkům a spojit je do jedné. Víš, že přežilo sedm současných klanu a věříš, že ze jmen dokážeš i s trochou důvtipu určit, do kterých klanů indiánů tito válečníci patří. Pak stačí jen zakreslit všechny hvězdy do jedné desky.",
             type: 'toggleMatrix',
             challengeConfig: {
+                width: 3,
+                height: 3,
                 fields: [
                     {row: 1, col: 1, label: 'A', key: 'albatros'},
                     {row: 2, col: 1, label: 'B', key: 'boar'},
-                    {row: 1, col: 2, label: 'C', key: 'cicada'},
                     {row: 3, col: 1, label: 'D', key: 'deer'},
-                    {row: 3, col: 3, label: 'E', key: 'emu'},
+                    
+                    {row: 1, col: 2, label: 'C', key: 'cicada'},
+                    {row: 2, col: 2, label: 'H', key: 'hound'},
+                    {row: 3, col: 2, label: 'J', key: 'jackal'},
+
+                    {row: 1, col: 3, label: 'F', key: 'flamingo'},
+                    {row: 2, col: 3, label: 'E', key: 'emu'},
+                    {row: 3, col: 3, label: 'G', key: 'grizzly'},
                 ],
             },
+            checkSum: '4cb45569',
             onError: [
                 ['message', "Na zem do písku před Teda kreslíš desku o 9 polích a zakresluješ do ní hvězdy, když v tom přiběhne pavouk, malbu smaže a zase uteče. Jak se zdá, pavoučí žena se ti snaží napovědět, že takhle to není správně a někde je chyba."],
                 ['gameState', 'reset'],
@@ -110,9 +123,10 @@ export default {
         {
             id: 'sotw.ch-7.shamans',
             name: "Usadit šamany",
-            description: "Tohle by mohla být pro Teda šance. Pokud se uklidní, třeba vymyslí i jiné řešení než smrt.\nDíváš se na kameny a vzpomínáš na to, jak se šamani k sobě chovali za celou tu dobu, co je sleduješ. Místo šamana kmene jelenů, jakožto hostitele, je jasné, ale co ostatní? Dle toho co jsi zjistil tak :\nMedvědi se od nepaměti přátelí s vlky, ale pumy a buvoli jsou jejich nepřátelé. Sovy byli vždy přáteli jelenů a nikdy neměli v oblibě medvědy a lišky. Pumy jsou známé tím, že se s nikým výrazně nepřátelí, pouze mají spory s lišáky a sovami. Oproti tomu vlci se snaží zavděčit pumám jak jen mohou a spřátelit se s nimi i za cenu toho, že se tím dostali do sporů s jeleny a bizony. Díky tomu bizoni pohrdají podlézavými vlky a namyšlenými pumami. Spřátelili se však se sovami. Navíc, dýmka vždy koluje od hostitele ve směru hodinových ručiček a šaman bizonů by se urazil, pokud by jí dostal před ním šaman medvědů…Snad si s tím poradím a podaří se mi naskládat kameny správně do kruhu..",
+            description: "Tohle by mohla být pro Teda šance. Pokud se uklidní, třeba vymyslí i jiné řešení než smrt.\nDíváš se na kameny a vzpomínáš na to, jak se šamani k sobě chovali za celou tu dobu, co je sleduješ. Místo šamana kmene jelenů, jakožto hostitele, je jasné, ale co ostatní? Dle toho co jsi zjistil tak:\n\nMedvědi se od nepaměti přátelí s vlky, ale pumy a buvoli jsou jejich nepřátelé.\nSovy byly vždy přáteli jelenů a nikdy neměli v oblibě medvědy a lišky.\nPumy jsou známé tím, že se s nikým výrazně nepřátelí, pouze mají spory s lišáky a sovami.\nOproti tomu vlci se snaží zavděčit pumám jak jen mohou a spřátelit se s nimi i za cenu toho, že se tím dostali do sporů s jeleny a bizony.\nDíky tomu bizoni pohrdají podlézavými vlky a namyšlenými pumami. Spřátelili se však se sovami.\nNavíc, dýmka vždy koluje od hostitele ve směru hodinových ručiček a šaman bizonů by se urazil, pokud by jí dostal před ním šaman medvědů…\n\nSnad si s tím poradím a podaří se mi naskládat kameny správně do kruhu..",
             type: 'zebraFoal',
             challengeConfig: async () => (await import('./challenge.sotw.shamans.js')).default,
+            checkSum: '7630d587',
             onError: [
                 ['message', "Ne když je usadíme takhle, tak budou hádat, nebo by se mohli i urazit."],
             ],
@@ -123,6 +137,7 @@ export default {
             description: "Musíš najít příbytek Bohpoli v mlžném městě. U jeho domu bys měl najít postup, jak sestavit správné hlavy a barvy totemu. Až se ti podaří sestavit správnou podobu totemu, tak bys měl ucítit spojení se světem živých. Teprve pak se vrať za Na'ashjé'íí Asdzáá.\n\nPodle návodu u příbytku Bohpoli vyměň hlavy a barvy, aby jsi dostal správnou kombinaci totemu.",
             type: 'mixMatch',
             challengeConfig: async () => (await import('./challenge.sotw.totems.js')).default,
+            checkSum: '5be7e1ec',
             onError: [
                 ['message', "Ne to není ono... stále necítíš spojení se světem živých"],
             ],
@@ -132,29 +147,36 @@ export default {
             name: "Kruhová deska",
             description: "Když slyšíš její slova, jdeš blíž k misce a cítíš, jak ti opět jiskří ruka. Zkusíš natáhnout ruku k jednomu z kruhů a posunout svítící značku směrem k totemu. Opravdu, kruh se začíná otáčet, ale spolu sním i ostatní kruhy. Když pohneš druhým kruhem, tak chtě nechtě, pohneš i ostatními kruhy. Jak se zdá nebude úplně snadné. Musíš najít způsob, jak srovnat všechny značky směrem k totemu.",
             type: 'rings',
-            challengeConfig: null,
+            challengeConfig: async () => (await import('./challenge.sotw.rings.js')).default,
+            checkSum: '4fad461c',
             onError: [
                 ['message', "Stále všechny ozářené značky nesměrují směrem nahoru k totemu"],
             ],
         },
         {
-            id: 'sotw.ch-10.drumbs',
+            id: 'sotw.ch-10.drums',
             name: "Bubny",
             description: "Jak se zdá, musíš zopakovat melodii, kterou bude Ted hrát na bubny.",
             type: 'drums',
+            checkSum: '56afb606',
             onError: [
                 ['message', "Ale ne! Popletly se ti bubny! Musíš to zkusit znovu!"],
             ],
         },
         {
-            id: 'sotw.ch-11.fatal-choice',
+            id: 'sotw.ch-11.final-choice',
+
             name: "Správný dar",
             description: "Musíš použít správný dar od šamanů, ke spoutání zlého ducha. Dar od kterého šamana použiješ?",
-            type: 'fatalChoice',
+            type: 'finalChoice',
             challengeConfig: {
                 options: ['bear', 'cougar', 'fox', 'deer', 'wolf', 'owl', 'bison'],
-                fatalTimeout: 15 * 60,
             },
+            checkSum: '1af84',
+            onError: [
+                ['message', 'Nevybral jsi dobře ! Stvůře se navíc podařilo tě odtáhnout od oltáře. Musíš jí tedy dotáhnout zpět a to zabere dobrých 10 minut.'],
+                ['timeout', 10 * 60],
+            ],
         },
     ],
 }

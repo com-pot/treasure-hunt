@@ -76,7 +76,7 @@ const unwrapSuccessfulJson = async (/**Response*/response) => {
 
   const contentType = response.headers.get('Content-Type') || ""
   if (!contentType.includes('application/json')) {
-    const e = new Error("Response is of wrong Content-Type:" + contentType + "\n  " + text)
+    const e = new Error(`Response of ${response.url} is of wrong Content-Type: ${contentType}, Status: ${response.status}\n   ${text}`)
     e.response = response
     e.responseBody = text
     throw e
@@ -84,7 +84,7 @@ const unwrapSuccessfulJson = async (/**Response*/response) => {
 
   const json = JSON.parse(text)
   if (response.status >= 400) {
-    const e = new Error("Response failed with status=" + response.status + "\n  " + text)
+    const e = new Error(`Request to ${response.url} failed with status=${response.status}\n  ${text}`)
     e.response = response
     e.responseBody = json
     throw e

@@ -6,7 +6,7 @@ export default {
             target: 'treasure-hunt.story',
         },
         title: {type: 'string'},
-        readOrder: {type: 'number'},
+        order: {type: 'number'},
         slug: {type: 'string'},
 
         contentBlocks: {type: 'json'},

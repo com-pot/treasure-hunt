@@ -7,6 +7,7 @@ import path from "path";
 
 import actionContextFactory from "./middleware/actionContext.js";
 import errorHandling from "./middleware/errorHandling.js";
+import {EventEmitter} from "events";
 
 const getModules = async () => {
     const cwd = path.resolve(process.cwd(), 'src')
@@ -25,7 +26,10 @@ const getModules = async () => {
 }
 
 const createServiceContainer = async (modules) => {
-    const serviceContainer = {modules}
+    const serviceContainer = {
+        modules,
+        eventBus: new EventEmitter()
+    }
 
     const allPrepared = Object.entries(serviceContainer.modules).map(async ([name, module]) => {
         await (module.compose && module.compose(serviceContainer))

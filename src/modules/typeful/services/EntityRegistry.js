@@ -1,6 +1,7 @@
 export default class EntityRegistry {
     constructor() {
         this.entities = []
+        this.entitiesIndex = {}
         
     }
     
@@ -31,6 +32,7 @@ export default class EntityRegistry {
             }
 
             this.entities.push(entry)
+            this.entitiesIndex[entry.entityFqn] = entry
         })
         
         return this
@@ -41,5 +43,9 @@ export default class EntityRegistry {
             .forEach(([name, module]) => module.entities && this.registerModule(name, module))
         
         return this
+    }
+
+    get(name) {
+        return this.entitiesIndex[name]
     }
 }

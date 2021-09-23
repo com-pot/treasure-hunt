@@ -92,7 +92,7 @@ export default class DaoController {
         delete data.stats
         merge(item, data)
         this.integrityService.sanitize(this.model, item, {
-            allowlist: ['stats', '_id']
+            allowlist: ['stats']
         })
         if (!item.stats) {
             item.stats = {}
@@ -101,7 +101,7 @@ export default class DaoController {
         item.stats.editor = action.actor
         item.stats.editedAt = action.moment
 
-        const result = await collection.updateOne(query, {$set: item})
+        const result = await collection.replaceOne(query, item)
         if (!result.acknowledged) {
             throw new Error('update-error.unacknowledged')
         }

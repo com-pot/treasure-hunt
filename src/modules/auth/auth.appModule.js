@@ -18,7 +18,7 @@ export const compose = async (serviceContainer) => {
 }
 
 export const startUp = async (serviceContainer) => {
-    const ctrl = new AuthController(serviceContainer.mongoClient, serviceContainer.jwtService)
+    const ctrl = new AuthController(serviceContainer.mongoClient, serviceContainer.jwtService, serviceContainer.eventBus)
 
     const router = new Router({
         prefix: '/auth',

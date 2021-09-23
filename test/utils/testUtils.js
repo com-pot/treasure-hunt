@@ -26,7 +26,23 @@ export default {
     if (auth) {
       return createTestApi(auth)
     }
-    
+
     return instances.testApi || (instances.testApi = createTestApi())
-  }
+  },
+
+  /**
+   * @param {ApiAdapter} api 
+   */
+  async useTestUser(api, credentials) {
+    if (!credentials) {
+      credentials = {
+        login: 'test-boy-' + Date.now(),
+        pass: 't3st',
+      }
+      await api.json.post('/auth/account', credentials)
+    }
+    
+    const result = await api.json.post('/auth/auth-token', credentials)
+    return Object.assign({}, result, credentials)
+  },
 }

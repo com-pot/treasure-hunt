@@ -6,7 +6,11 @@ export default class StaticController {
     }
     
     async list(actionContext) {
-        const items = this.strategy.items
+        let items = this.strategy.items
+        if (this.strategy.formatItem) {
+            items = await Promise.all(items.map(this.strategy.formatItem))
+        }
+
         
         return {
             page: 1,
@@ -14,12 +18,16 @@ export default class StaticController {
             items: items,
         }
     }
+
     async findOne(actionContext, criteria) {
         const key = this.strategy.primaryKey
 
         const item = this.strategy.items.find((item) => item[key] === criteria)
         if (!item) {
             throw new Error('not-found')
+        }
+        if (this.strategy.formatItem) {
+            item = await this.strategy.formatItem(item)
         }
         return item
     }

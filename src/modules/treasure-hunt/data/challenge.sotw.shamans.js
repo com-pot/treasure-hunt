@@ -3,12 +3,12 @@ export default {
       {
         "name": "deer",
         "helpText:": "",
-        "rules:": []
+        "rules": []
       },
       {
         "name": "bear",
         "helpText:": "",
-        "rules:": [
+        "rules": [
           ["within", 1, ["includes", "wolf"]],
           ["within", 1, ["!includes", "cougar"]],
           ["within", 1, ["!includes", "bison"]]
@@ -17,7 +17,7 @@ export default {
       {
         "name": "owl",
         "helpText:": "",
-        "rules:": [
+        "rules": [
           ["within", 1, ["includes", "deer"]],
           ["within", 1, ["!includes", "bear"]],
           ["within", 1, ["!includes", "fox"]]
@@ -26,19 +26,19 @@ export default {
       {
         "name": "cougar",
         "helpText:": "",
-        "rules:": [
+        "rules": [
           ["within", 1, ["!includes", "fox"]],
           ["within", 1, ["!includes", "owl"]]
         ]
       },
       {
         "name": "fox",
-        "rules:": []
+        "rules": []
       },
       {
         "name": "wolf",
         "helpText:": "",
-        "rules:": [
+        "rules": [
           ["within", 1, ["includes", "cougar"]],
           ["within", 1, ["!includes", "deer"]],
           ["within", 1, ["!includes", "bison"]]
@@ -47,7 +47,7 @@ export default {
       {
         "name": "bison",
         "helpText:": "",
-        "rules:": [
+        "rules": [
           ["within", 1, ["!includes", "wolf"]],
           ["within", 1, ["!includes", "cougar"]],
           ["within", 1, ["includes", "owl"]],

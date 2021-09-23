@@ -1,12 +1,14 @@
+import events from "events"
 import mongodb from "mongodb"
 import bcrypt from "bcrypt"
 
 export default class AuthController {
-    constructor(mongoClient, jwtService) {
+    constructor(mongoClient, jwtService, eventBus) {
         /** @type {mongodb.MongoClient} */
         this.mongoClient = mongoClient
         this.jwtService = jwtService
-
+        /** @type {events.EventEmitter} */
+        this.eventBus = eventBus
     }
 
     async signUp(action, credentials) {
@@ -19,7 +21,7 @@ export default class AuthController {
 
         const user = await users.findOne({login})
         if (user) {
-            throw new Object.assign(new Error('login-taken'), {status: 409})
+            throw Object.assign(new Error('login-taken'), {status: 409})
         }
 
         const newUser = {
@@ -33,6 +35,10 @@ export default class AuthController {
         if (!result.acknowledged) {
             throw new Error('update-error.unacknowledged')
         }
+
+        const promises = []
+        this.eventBus.emit('auth.user-registered', {user: newUser, promises})
+        await Promise.all(promises)
 
         return true
 
@@ -50,11 +56,11 @@ export default class AuthController {
         const loginMethod = user && user.loginMethods && user.loginMethods[0]
         if (!loginMethod) {
             bcrypt.hashSync(pass, 10)
-            throw new Object.assign(new Error('invalid-credentials'), {status: 401})
+            throw Object.assign(new Error('invalid-credentials'), {status: 401})
         }
 
         if (!bcrypt.compareSync(pass, loginMethod.hash)) {
-            throw new Object.assign(new Error('invalid-credentials'), {status: 401})
+            throw Object.assign(new Error('invalid-credentials'), {status: 401})
         }
 
         const token = this.jwtService.create({login}, {duration: 7 * 24 * 60 * 1000})
@@ -73,7 +79,7 @@ export default class AuthController {
 
         const user = await users.findOne({login: action.actor})
         if (!user) {
-            throw new Object.assign(new Error('login-not-found'), {status: 404})
+            throw Object.assign(new Error('login-not-found'), {status: 404})
         }
 
         delete user._id

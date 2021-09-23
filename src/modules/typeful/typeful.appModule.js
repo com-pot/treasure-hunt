@@ -24,6 +24,27 @@ export const compose = async (serviceContainer) => {
     serviceContainer.controllerFactory = new ControllerFactory(serviceContainer)
 
     serviceContainer.mongoClient = await initMongoClient()
+
+    serviceContainer.entityRegistry.entities.forEach((entity) => {
+        if (entity.config.service) {
+            if (entity.config.service.mongoClient === null) {
+                entity.config.service.mongoClient = serviceContainer.mongoClient
+            }
+        }
+    })
+
+    serviceContainer.model = new Proxy({}, {
+        get(target, name) {
+            const entity = serviceContainer.entityRegistry.get(name)
+            if (!entity) {
+                throw new Error(`Entity ${name} does not exist`)
+            }
+            if (!entity.config.service) {
+                throw new Error(`Enttiy ${name} does not have a service associated`)
+            }
+            return entity.config.service
+        }
+    })
 }
 
 export const startUp = async (serviceContainer) => {
