@@ -1,6 +1,6 @@
 import Router from "@koa/router"
 import ensureJsonRequest from "../../middleware/ensureJsonRequest.js"
-import AuthController from "./controllers/authController.js"
+import AuthController from "./controllers/AuthController.js"
 import userModel from "./model/user.js"
 import JwtService from "./servies/JwtService.js"
 
