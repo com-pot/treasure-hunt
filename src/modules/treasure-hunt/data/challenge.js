@@ -19,7 +19,7 @@ export default {
             description: "Ted se potřebuje spřátelit s indiány a tak by bylo dobré, kdyby projevil úctu a správně dívku oslovil jménem. Ovšem při všem tom včerejším učení její jméno zapomenul. Tvá paměť určitě ale není tak krátká jako Tedova a určitě mu budeš umět do ucha pošeptat jméno indiánské dívky.",
             type: 'password',
             challengeConfig: {prompt: "Jak se jen jmenuje??"},
-            checkSum: '71f1b779',
+            checkSum: '3b56a399',
             onError: [
                 ['message', "Ne ne! To není ono musíš si vzpomenout, jak se jmenovala !"],
                 ['gameState', "reset"],
@@ -47,10 +47,10 @@ export default {
             name: 'Jméno',
             description: "Víš, že autor použil název „Příběh Byla Naprdla“ . Což opravdu nezní jako indiánské jméno. V tom ti to dojde, indiáni jméno přece neskloňují. Takže né „Byla Naprdla“, ale „Byl Naprdlo“. Šaman taky říkal, že tohle jméno vytvořil z původního překladu indiánského jména. Takže pokud si pohraješ s písmeny a správně je přeskládáš, měl by jsi být schopen přijít na pravé čestné jméno které si indián vysloužil . Postupně zapisuj písmena z posměšného jména a nezapomeň oddělit jednotlivé časti jména mezerou.",
             type: 'anagram',
-            challengeConfig: {inputText: 'byl naprdlo', outputLength: 'byl naprdlo '.length,  check: '28f185a6'},
-            checkSum: '44d2f8c9',
+            challengeConfig: {inputText: 'byl naprdlo', outputLength: 'byl naprdlo '.length},
+            checkSum: '481a3a09',
             onError: [
-                ['message', "Tohle nezní úplně správně možná to budu muset ještě trochu zpřeházet nebo změnit pořadí ?"],
+                ['message', "Tohle nezní úplně správně možná to budu muset ještě trochu zpřeházet nebo změnit pořadí? Vzpomeň si na příběh - z kolika částí se skládá původní jméno"],
             ],
         },
         {
@@ -114,7 +114,7 @@ export default {
                     {row: 3, col: 3, label: 'G', key: 'grizzly'},
                 ],
             },
-            checkSum: '4cb45569',
+            checkSum: '711eab77',
             onError: [
                 ['message', "Na zem do písku před Teda kreslíš desku o 9 polích a zakresluješ do ní hvězdy, když v tom přiběhne pavouk, malbu smaže a zase uteče. Jak se zdá, pavoučí žena se ti snaží napovědět, že takhle to není správně a někde je chyba."],
                 ['gameState', 'reset'],
