@@ -4,9 +4,9 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "start": "nodemon -r dotenv/config --ignore test/* src/app.js",
+    "start": "nodemon -r dotenv/config --ignore 'test/*' src/app.js",
     "test": "mocha -r test/boot.js",
-    "test-all": "npm run test  src/**/*.spec.js",
+    "test-all": "npm run test src/**/*.spec.js",
 
     "e2e": "mocha -r dotenv/config -r test/boot.js dotenv_config_path=./e2e.env",
     "e2e-all": "npm run e2e test/e2e/**/*.spec.js"

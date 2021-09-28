@@ -8,6 +8,7 @@ import path from "path";
 import actionContextFactory from "./middleware/actionContext.js";
 import errorHandling from "./middleware/errorHandling.js";
 import {EventEmitter} from "events";
+import Router from "@koa/router";
 
 const getModules = async () => {
     const cwd = path.resolve(process.cwd(), 'src')
@@ -51,6 +52,10 @@ export const createApp = async () => {
     app.use(errorHandling());
     app.use(actionContextFactory(serviceContainer.jwtService))
 
+    const appRouter = new Router({
+        prefix: process.env.APP_SUBFOLDER,
+    })
+
     const allReady = Object.entries(serviceContainer.modules).map(async ([name, module]) => {
         const moduleData = await (module.startUp && module.startUp(serviceContainer))
         let router = module.router || (moduleData && moduleData.router)
@@ -58,10 +63,20 @@ export const createApp = async () => {
             return
         }
 
-        app.use(router.routes())
-        app.use(router.allowedMethods())
+        appRouter.use(router.routes())
+        appRouter.use(router.allowedMethods())
     })
+
     await Promise.all(allReady)
+    app.use(appRouter.routes())
+    app.use(appRouter.allowedMethods())
+
+    app.use(async (ctx, next) => {
+        await next()
+        if (ctx.status === 404 && (!ctx.body || ctx.body === "Not Foubd")) {
+            throw Object.assign(new Error('not-found'), {status: 404, details: 'route-not-found'})
+        }
+    })
     
     return app
 }
