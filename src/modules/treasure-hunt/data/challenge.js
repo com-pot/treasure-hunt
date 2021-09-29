@@ -37,7 +37,7 @@ export default {
                     {name: 'moss', caption: "Kousků lišejníku"},
                 ],
             },
-            checkSum: '744b18',
+            checkSum: '744b1831',
             onError: [
                 ['message', "Instinkt ti říká, že tohle není správně. Musíš se víc soustředit! Špatný poměr by Teda mohl zabít!"],
             ],

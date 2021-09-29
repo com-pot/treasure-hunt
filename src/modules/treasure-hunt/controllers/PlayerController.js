@@ -103,10 +103,6 @@ export default class PlayerController {
             return { status: 'timeout', timeout }
         }
         
-        if (progression.status === 'done') {
-            throw Object.assign(new Error('already-solved'), {status: 409})
-        }
-        
         const challenge = sotwChallenges.collection.find((ch) => ch.id === storyPart.challenge)
         if (!challenge.checkSum) {
             throw Object.assign(new Error('no-check-available'), {status: 409})
@@ -129,6 +125,10 @@ export default class PlayerController {
             }
             
             return errResult
+        }
+        
+        if (progression.status === 'done') {
+            throw Object.assign(new Error('already-solved'), {status: 409})
         }
         
         await progressionCollection.updateOne(progressionQuery, {$set: {status: 'done'}})
