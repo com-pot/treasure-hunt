@@ -37,6 +37,10 @@ export const startUp = async (serviceContainer) => {
     router.post('/auth-token', async (ctx) => {
         ctx.body = await ctrl.signIn(ctx.actionContext, ctx.request.body)
     })
+
+    router.put('/user/:login/password', async (ctx) => {
+        ctx.body = await ctrl.updatePassword(ctx.actionContext, ctx.request.body.password, ctx.params.login)
+    })
     
     return {
         router,

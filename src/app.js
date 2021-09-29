@@ -9,6 +9,7 @@ import actionContextFactory from "./middleware/actionContext.js";
 import errorHandling from "./middleware/errorHandling.js";
 import {EventEmitter} from "events";
 import Router from "@koa/router";
+import requireBackstageManager from "./modules/auth/middleware/requireBackstageManager.js";
 
 const getModules = async () => {
     const cwd = path.resolve(process.cwd(), 'src')
@@ -50,26 +51,37 @@ export const createApp = async () => {
     app.use(koaBodyparser())
 
     app.use(errorHandling());
-    app.use(actionContextFactory(serviceContainer.jwtService))
+    app.use(actionContextFactory(serviceContainer.jwtService, serviceContainer.mongoClient))
 
     const appRouter = new Router({
         prefix: process.env.APP_SUBFOLDER,
     })
+    const backstageRouter = new Router({
+        prefix: '/backstage',
+    })
+    backstageRouter.use(requireBackstageManager())
 
     const allReady = Object.entries(serviceContainer.modules).map(async ([name, module]) => {
         const moduleData = await (module.startUp && module.startUp(serviceContainer))
-        let router = module.router || (moduleData && moduleData.router)
-        if (!router) {
-            return
+        const router = module.router || (moduleData && moduleData.router)
+        if (router) {
+            appRouter.use(router.routes())
+            appRouter.use(router.allowedMethods())
         }
 
-        appRouter.use(router.routes())
-        appRouter.use(router.allowedMethods())
+        const bsRouter = module.backstageRouter || (moduleData && moduleData.backstageRouter)
+        if (bsRouter) {
+            backstageRouter.use(bsRouter.routes())
+            backstageRouter.use(bsRouter.allowedMethods())
+        }
     })
 
     await Promise.all(allReady)
+    appRouter.use(backstageRouter.routes())
+    appRouter.use(backstageRouter.allowedMethods())
     app.use(appRouter.routes())
     app.use(appRouter.allowedMethods())
+    
 
     app.use(async (ctx, next) => {
         await next()

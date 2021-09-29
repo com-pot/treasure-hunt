@@ -1,6 +1,6 @@
 import mongodb from "mongodb";
 
-import { createRouter } from "./router.js"
+import { createBackstageRouter } from "./router.js"
 import ControllerFactory from "./services/ControllerFactory.js"
 import EntityRegistry from "./services/EntityRegistry.js"
 import IntegrityService from "./services/IntegrityService.js"
@@ -49,6 +49,6 @@ export const compose = async (serviceContainer) => {
 
 export const startUp = async (serviceContainer) => {
     return {
-        router: createRouter(serviceContainer.entityRegistry, serviceContainer.controllerFactory),
+        backstageRouter: createBackstageRouter(serviceContainer.entityRegistry, serviceContainer.controllerFactory),
     }
 }

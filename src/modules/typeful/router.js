@@ -4,13 +4,15 @@ import EntityRegistry from "./services/EntityRegistry.js"
 import ControllerFactory from "./services/ControllerFactory.js"
 import ensureJsonRequest from "../../middleware/ensureJsonRequest.js"
 
+
+
 /**
 * 
 * @param {EntityRegistry} entityRegistry 
 * @param {ControllerFactory} controllerFactory 
 * @returns 
 */
-export function createRouter(entityRegistry, controllerFactory) {
+export function createBackstageRouter(entityRegistry, controllerFactory) {
     const router = new Router()
     router.use(ensureJsonRequest())
 

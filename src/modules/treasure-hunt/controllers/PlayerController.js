@@ -131,7 +131,7 @@ export default class PlayerController {
             return errResult
         }
         
-        // await progressionCollection.updateOne(progressionQuery, {$set: {status: 'done'}})
+        await progressionCollection.updateOne(progressionQuery, {$set: {status: 'done'}})
         
         const checkResult = {
             status: 'ok',

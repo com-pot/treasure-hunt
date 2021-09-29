@@ -13,6 +13,7 @@ import challengeData from "./data/challenge.js"
 import PlayerController from './controllers/PlayerController.js'
 
 import requirePlayer from './middleware/requirePlayer.js'
+import DashboardController from './controllers/DashboardController.js'
 
 export const entities = {
     player: {
@@ -65,7 +66,7 @@ export const entities = {
 
 const createPlayerRouter = (serviceContainer) => {
     const router = new Router()
-    router.use(requirePlayer(serviceContainer.mongoClient))
+    router.use('/progression', requirePlayer(serviceContainer.mongoClient))
 
     const playerCtrl = new PlayerController(serviceContainer.mongoClient, serviceContainer.model)
     router.get('/progression', async (ctx) => {
@@ -78,6 +79,21 @@ const createPlayerRouter = (serviceContainer) => {
 
     router.post('/progression/:slug/answer', async (ctx) => {
         ctx.body = await playerCtrl.checkChallengeAnswer(ctx.actionContext, ctx.player, ctx.params.slug, ctx.request.body)
+    })
+
+    return router
+}
+
+const createBackstageRouter = (serviceContainer) => {
+    const router = new Router({prefix: '/treasure-hunt'})
+
+    const dashCtrl = new DashboardController(serviceContainer.mongoClient)
+
+    router.get('/dashboard/players', async (ctx) => {
+        ctx.body = await dashCtrl.getPlayersDashboard(ctx.actionContext)
+    })
+    router.get('/dashboard/story', async (ctx) => {
+        ctx.body = await dashCtrl.getStoryDashboard(ctx.actionContext, ctx.query.story)
     })
 
     return router
@@ -97,5 +113,6 @@ export const startUp = async (serviceContainer) => {
 
     return {
         router,
+        backstageRouter: createBackstageRouter(serviceContainer),
     }
 }
