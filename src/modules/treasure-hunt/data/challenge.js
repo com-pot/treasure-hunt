@@ -158,7 +158,7 @@ export default {
             name: "Bubny",
             description: "Jak se zdá, musíš zopakovat melodii, kterou bude Ted hrát na bubny.",
             type: 'drums',
-            checkSum: '56afb606',
+            checkSum: '581d381b',
             onError: [
                 ['message', "Ale ne! Popletly se ti bubny! Musíš to zkusit znovu!"],
             ],
