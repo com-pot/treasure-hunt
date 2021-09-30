@@ -92,6 +92,13 @@ const createBackstageRouter = (serviceContainer) => {
     router.get('/dashboard/players', async (ctx) => {
         ctx.body = await dashCtrl.getPlayersDashboard(ctx.actionContext)
     })
+
+    router.post('/dashboard/player/:login/trophy/redeem', async (ctx) => {
+        ctx.body = {
+            trophy: await dashCtrl.redeemTrophy(ctx.actionContext, ctx.params.login),
+        }
+    })
+
     router.get('/dashboard/story', async (ctx) => {
         ctx.body = await dashCtrl.getStoryDashboard(ctx.actionContext, ctx.query.story)
     })

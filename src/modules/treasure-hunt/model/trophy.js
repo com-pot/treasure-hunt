@@ -4,5 +4,6 @@ export default {
         player: {type: 'relation', target: 'treasure-hunt.player'},
         story: {type: 'relation', target: 'treasure-hunt.story'},
         order: {type: 'number'},
+        redeemedAt: {type: 'date'},
     },
 }

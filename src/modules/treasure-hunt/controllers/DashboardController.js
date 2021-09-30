@@ -10,6 +10,7 @@ export default class DashboardController {
     async getPlayersDashboard(actionContext) {
         const playersCollection = this.mongoClient.db().collection('treasure-hunt.player')
         const progressionCollection = this.mongoClient.db().collection('treasure-hunt.player-progression')
+        const trophiesCollection = this.mongoClient.db().collection('treasure-hunt.trophy')
         
         const players = await playersCollection.find().limit(200).toArray()
         
@@ -27,10 +28,40 @@ export default class DashboardController {
             }
             player.currentChallenge = prog.currentChallenge
         })
+
+        const trophies = await trophiesCollection.find({player: {$in: playerIds}}).toArray()
+        trophies.forEach((trophy) => {
+            const player = playersIndex[trophy.player]
+            if (!player) {
+                console.warn("No player for trophy", trophy._id);
+                return
+            }
+            player.trophy = trophy
+        })
         
         return {
             players,
         }
+    }
+
+    async redeemTrophy(actionContext, login) {
+        const playersCollection = this.mongoClient.db().collection('treasure-hunt.player')
+        const trophiesCollection = this.mongoClient.db().collection('treasure-hunt.trophy')
+
+        const player = await playersCollection.findOne({login})
+        if (!player) {
+            throw Object.assingn(new Error('not-found'), {details: "player-not-found"})
+        }
+        const trophy = await trophiesCollection.findOne({player: player._id})
+        if (!trophy) {
+            throw Object.assingn(new Error('not-found'), {details: "trophy-not-found"})
+        }
+        if (trophy.redeemedAt) {
+            throw Object.assingn(new Error('already-redeemed'), {status: 409})
+        }
+        await trophiesCollection.updateOne({player: player._id}, {$set: {redeemedAt: actionContext.moment}})
+
+        return await trophiesCollection.findOne({player: player._id})
     }
     
     async getStoryDashboard(actionContext, story) {
