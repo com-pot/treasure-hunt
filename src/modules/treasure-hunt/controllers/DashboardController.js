@@ -13,6 +13,7 @@ export default class DashboardController {
         const trophiesCollection = this.mongoClient.db().collection('treasure-hunt.trophy')
         
         const players = await playersCollection.find().limit(200).toArray()
+        const playerIds = players.map((p) => p._id)
         
         const playersIndex = Object.fromEntries(players.map((p) => [p._id.toString(), p]))
         
