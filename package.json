@@ -2,13 +2,12 @@
   "name": "@com-pot/treasure-hunt",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
-    "start": "nodemon -r dotenv/config --ignore 'test/*' src/app.js",
-    "test": "mocha -r test/boot.js",
-    "test-all": "npm run test src/**/*.spec.js",
-
-    "e2e": "mocha -r dotenv/config -r test/boot.js dotenv_config_path=./e2e.env",
+    "start": "nodemon",
+    "test": "mocha -r ts-node/register -r esm -r test/boot.js",
+    "test-all": "npm run test 'src/**/*.spec.@(js|ts)'",
+    "e2e": "mocha -r ts-node/register -r esm -r dotenv/config -r test/boot.js dotenv_config_path=./e2e.env",
     "e2e-all": "npm run e2e test/e2e/**/*.spec.js"
   },
   "author": "Thoronir42@Gmail.com",
@@ -24,11 +23,24 @@
     "koa": "^2.13.1",
     "koa-bodyparser": "^4.3.0",
     "lodash": "^4.17.21",
-    "mongodb": "^4.1.2"
+    "mongodb": "^4.1.2",
+    "tsconfig-paths": "^3.11.0"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.0",
+    "@types/chai": "^4.2.22",
+    "@types/glob": "^7.1.4",
+    "@types/jsonwebtoken": "^8.5.5",
+    "@types/koa": "^2.13.4",
+    "@types/koa__cors": "^3.0.3",
+    "@types/koa__router": "^8.0.8",
+    "@types/koa-bodyparser": "^4.3.3",
+    "@types/lodash": "^4.14.175",
+    "@types/mocha": "^9.0.0",
     "chai": "^4.3.4",
     "mocha": "^9.1.1",
-    "nodemon": "^2.0.12"
+    "nodemon": "^2.0.12",
+    "ts-node": "^10.2.1",
+    "typescript": "^4.4.3"
   }
 }

@@ -1,8 +1,9 @@
 import { expect } from "chai"
 
-import IntegrityService from "../services/IntegrityService.js"
-import TypeRegistry from "../services/TypeRegistry.js"
-import defaultTypesModule from "../defaultTypesModule.js"
+// When using modules from .ts files, import syntax cannot be used
+const IntegrityService = require ("../services/IntegrityService").default
+const TypeRegistry = require ("../services/TypeRegistry").default
+import defaultTypesModule from "../defaultTypesModule"
 
 export const stringify = (value) => {
     if (Array.isArray(value)) {
@@ -58,7 +59,7 @@ export default {
     
     createIntegrityService() {
         const typeRegistry = new TypeRegistry()
-        .registerTypes(defaultTypesModule)
+            .registerTypes(defaultTypesModule)
         const service = new IntegrityService(typeRegistry)
         
         return service

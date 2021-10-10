@@ -2,14 +2,14 @@ import testUtils from "../../utils/testUtils.js";
 
 describe('Progression', function () {
   const api = testUtils.useApi()
-  
+
   let testUser, playerApi
 
   this.beforeAll(async () => {
     testUser = await testUtils.useTestUser(api)
     playerApi = testUtils.useApi(testUser.token)
   })
-  
+
   it("retrieves current players progression", async function () {
     const result = await playerApi.json.get('/treasure-hunt/progression')
     expect(result).to.have.length(1)
@@ -29,7 +29,8 @@ describe('Progression', function () {
 
   it("checks answer - correct", async function() {
     const okResult = await playerApi.json.post('/treasure-hunt/progression/pochop/answer', {checkSum: '3'})
-    expect(okResult.storyPart).to.be.an('object')
-    expect(okResult.storyPart.slug).to.equal('pozdrav')
+    expect(okResult.progression).to.be.an('array', 'result should contain progression list')
+    expect(okResult.progression).to.have.lengthOf(2, 'progression should have 1 new item')
+    expect(okResult.progression[1].slug).to.equal('pozdrav', 'new progression item should be "pozdrav"')
   })
 })

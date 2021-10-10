@@ -12,6 +12,9 @@ export default class ApiAdapter {
       throw new Error("Invalid parameter config.baseUrl")
     }
     this._config = config
+    this.middleware = {
+      req: []
+    }
   }
 
   get(path, config) {
@@ -50,7 +53,15 @@ export default class ApiAdapter {
    * @param {RequestConfig} [config]
    * @returns {Promise<Response>}
    */
-  makeRequest (method, path, data, config) {
+  async makeRequest (method, path, data, config) {
+    if (!config) {
+      config = {}
+    }
+
+    for (let cb of this.middleware.req) {
+      await cb(config)
+    }
+
     const endpointUrl = new URL(this._config.baseUrl + path)
     if (config && config.query) {
       Object.keys(config.query).forEach((key) => endpointUrl.searchParams.append(key, config.query[key]))
