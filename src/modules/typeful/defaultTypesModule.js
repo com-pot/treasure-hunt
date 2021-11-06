@@ -1,4 +1,5 @@
 import bool from "./types/bool.js";
+import date from "./types/date.js";
 import json from "./types/json.js";
 import list from "./types/list.js";
 import map from "./types/map.js";
@@ -11,6 +12,7 @@ import tType from "./types/type.js";
 export default {
     types: {
         bool,
+        date,
         json,
         list,
         map,

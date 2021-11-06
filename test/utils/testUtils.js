@@ -11,10 +11,18 @@ function createTestApi(authToken) {
     defaultHeaders.Authorization = 'Bearer ' + authToken
   }
 
-  return new ApiAdapter({
+  const apiAdapter = new ApiAdapter({
     baseUrl: process.env.TEST_API_BASE_URL,
     defaultHeaders,
   })
+  apiAdapter.middleware.req.push((/**RequestConfig*/ config) => {
+    if (!config.query) {
+      config.query = {}
+    }
+    config.query['devAuth'] = process.env.BACKSTAGE_DEV_AUTH
+  })
+
+  return apiAdapter
 }
 
 export default {
@@ -31,7 +39,7 @@ export default {
   },
 
   /**
-   * @param {ApiAdapter} api 
+   * @param {ApiAdapter} api
    */
   async useTestUser(api, credentials) {
     if (!credentials) {
@@ -41,7 +49,7 @@ export default {
       }
       await api.json.post('/auth/account', credentials)
     }
-    
+
     const result = await api.json.post('/auth/auth-token', credentials)
     return Object.assign({}, result, credentials)
   },

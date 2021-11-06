@@ -1,8 +1,5 @@
-import personModel from './model/person.js'
-
-export const entities = {
+module.exports.entities = {
     person: {
-        model: personModel,
         plural: 'people',
     },
 }
