@@ -10,7 +10,7 @@ export default (tfa: TypefulAccessor): Middleware => {
         }
         const players = tfa.getDao('treasure-hunt.player')
 
-        const player = await players.findOne!(ctx.actionContext, {user: ctx.actionContext.actor})
+        const player = await players.findOne(ctx.actionContext, {user: ctx.actionContext.actor})
         if (!player) {
             throw new AppError('missing-player', 403, {error: 'no-player'})
         }

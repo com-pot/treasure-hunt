@@ -1,4 +1,6 @@
-export default {
+import { TypefulType } from "../typeful"
+
+const t: TypefulType = {
     validate(value) {
         return Array.isArray(value)
     },
@@ -9,3 +11,4 @@ export default {
         return value
     },
 }
+export default t

@@ -1,10 +1,10 @@
-import typeSpec from "../test/typeSpec.js"
-import bool from "./bool.js"
+import typeSpec from "../test/typeSpec"
+import bool from "./bool"
 
 describe('types/bool', function() {
     const validValues = [true, false]
     const invalidValues = [0, 1, -1, 'hi', null, undefined]
-    
+
     typeSpec.validateType(bool, {type: 'bool'}, validValues, invalidValues)
     typeSpec.sanitizeValues(bool, {type: 'bool'}, [
         [true, true],
@@ -13,7 +13,7 @@ describe('types/bool', function() {
         [0, false],
         ['true', true],
         ['false', false],
-        
+
         [undefined, undefined],
         [null, null],
         ['hello', null],

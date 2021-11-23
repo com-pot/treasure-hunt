@@ -1,15 +1,14 @@
+import Router from "@koa/router"
+export type ServiceContainer = Record<string, any> // eslint-disable-line @typescript-eslint/no-explicit-any
 
-export type ServiceContainer = Record<string, any>
-
-type StartupResult = {
-    backstageRouter?: any,
-    router?: any,
+type AppRouting = {
+    backstageRouter?: Router,
+    router?: Router,
 }
+
+type StartupResult = AppRouting
+
 export type AppModule = {
-    compose?: (container: ServiceContainer, config: any) => Promise<any>
+    compose?: (container: ServiceContainer, config: unknown) => Promise<void>
     startUp?: (container: ServiceContainer) => Promise<StartupResult>
-
-    router?: any,
-    backstageRouter?: any,
-
-} // TODO: define AppModule
+} & AppRouting

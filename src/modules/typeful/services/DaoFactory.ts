@@ -1,7 +1,8 @@
+import AppError from "../../../app/AppError";
 import { Dao, DaoStrategy } from "./dao/Daos"
 import { EntityConfigEntry } from "./EntityRegistry";
 
-export type DaoCreateFn = (config: EntityConfigEntry) => Dao
+export type DaoCreateFn = (config: EntityConfigEntry) => Partial<Dao>
 
 export default class DaoFactory {
     private daoCreateFns: Record<string, DaoCreateFn> = {}
@@ -26,6 +27,21 @@ export default class DaoFactory {
             throw new Error(`Dao type '${config.strategy.type}' not available`)
         }
 
-        return this.daoCreateFns[config.strategy.type](config)
+        const daoProxy = new Proxy(this.daoCreateFns[config.strategy.type](config), {
+            get(t, p) {
+                const prop = p as keyof Dao
+                if (!t[prop]) {
+                    return () => Promise.reject(new AppError('not-implemented', 501, {
+                        subject: 'dao',
+                        key: config.meta.entityFqn,
+                        member: prop,
+                    }))
+                }
+
+                return t[prop]
+            }
+        })
+
+        return daoProxy as Dao
     }
 }

@@ -1,8 +1,10 @@
+import { EntityInstance, EntityRef } from "../../typeful/typeful"
+
 export default {
     type: 'schema',
     fields: {
         title: {type: 'string'},
-            authors: {
+        authors: {
             type: 'list',
             innerType: {
                 type: 'relation',
@@ -10,4 +12,9 @@ export default {
             },
         },
     },
+}
+
+export type StoryEntity = EntityInstance & {
+    title: string,
+    authors: EntityRef[],
 }

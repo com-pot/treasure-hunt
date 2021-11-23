@@ -1,4 +1,4 @@
-import { EntityConfig, TypefulModule } from "../typeful"
+import { EntityConfig, PersistenceStrategy, TypefulModule } from "../typeful"
 
 
 export type EntityConfigEntry = EntityConfig & {
@@ -9,31 +9,35 @@ export type EntityConfigEntry = EntityConfig & {
         entityFqn: string,
         collectionFqn: string,
     }
+    strategy: NonNullable<EntityConfig['strategy']>
+}
+
+const initStrategy = (strategy?: Partial<PersistenceStrategy>): PersistenceStrategy => {
+    strategy = Object.assign({}, strategy)
+    if (!strategy.type) {
+        strategy.type = 'mongo'
+    }
+    if (!strategy.primaryKey) {
+        strategy.primaryKey = 'id'
+    }
+
+    return strategy as PersistenceStrategy
 }
 
 export default class EntityRegistry {
-    
+
     public readonly entities: EntityConfigEntry[]
     private entitiesIndex: Record<string, EntityConfigEntry>
-    
+
     constructor() {
         this.entities = []
         this.entitiesIndex = {}
     }
-    
+
     registerModule(moduleName: string, module: TypefulModule): this {
-        Object.entries(module.entities!).forEach(([entityName, entity]) => {
+        module.entities && Object.entries(module.entities).forEach(([entityName, entity]) => {
             const collectionName = entity.plural || entityName + 's'
-            if (!entity.strategy) {
-                entity.strategy = {}
-            }
-            if (!entity.strategy.type) {
-                entity.strategy.type = 'mongo'
-            }
-            if (!entity.strategy.primaryKey) {
-                entity.strategy.primaryKey = 'id'
-            }
-            
+
             const entry: EntityConfigEntry = {
                 ...entity,
                 meta: {
@@ -43,21 +47,22 @@ export default class EntityRegistry {
 
                     entityFqn: `${moduleName}.${entityName}`,
                     collectionFqn: `${moduleName}.${collectionName}`,
-                }
+                },
+                strategy: initStrategy(entity.strategy),
             }
-            
+
             if (entry.meta.entityFqn === entry.meta.collectionName) {
                 console.warn("Collection and entity resulted in same name: " + entry.meta.entityFqn + ". Ignoring");
                 return
             }
-            
+
             this.entities.push(entry)
             this.entitiesIndex[entry.meta.entityFqn] = entry
         })
-        
+
         return this
     }
-    
+
     get(name: string): EntityConfigEntry {
         return this.entitiesIndex[name]
     }

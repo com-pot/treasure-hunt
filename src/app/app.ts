@@ -38,7 +38,7 @@ export const createApp = async () => {
     })
     backstageRouter.use(requireBackstageManager())
 
-    const allReady = Object.entries(modules).map(async ([name, module]) => {
+    const allReady = Object.entries(modules).map(async ([, module]) => {
         const moduleData = await (module.startUp && module.startUp(serviceContainer))
         const router = module.router || (moduleData && moduleData.router)
         if (router) {
@@ -73,7 +73,7 @@ export const createApp = async () => {
 
 createApp()
     .then((app) => {
-        let port = process.env.APP_PORT || 3000
+        const port = process.env.APP_PORT || 3000
         app.listen(port, () => {
             console.log("listening on " + port);
         })

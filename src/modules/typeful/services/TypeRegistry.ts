@@ -7,11 +7,11 @@ export default class TypeRegistry {
         this.types = new Map()
     }
 
-    registerTypes(module: TypefulModule, prefix?: string) {
+    registerTypes(module: TypefulModule, prefix?: string): this {
         if (!module.types) {
-            return
+            return this
         }
-        
+
         Object.entries(module.types).forEach(([name, type]) => {
             const fqn = prefix ? `${prefix}.name` : name
             if (this.types.has(fqn)) {

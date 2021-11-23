@@ -1,15 +1,34 @@
-export type EntityModel = any // TODO: redefine as ModelSchema
+import { ObjectId } from "mongodb"
+import { IntegrityContext } from "./services/IntegrityService"
+
+// TODO: redefine as ModelSchema
+export type FieldModel = {
+    type: string,
+    required?: boolean,
+    defaultValue?: unknown,
+}
+export type EntityModel = FieldModel & SchemaSpec
+
+type EntityPluginModule = object | {create: (...any) => any } // eslint-disable-line @typescript-eslint/no-explicit-any
+
+export type PersistenceStrategy = {
+    type: 'mongo' | 'static' | string,
+    primaryKey: string,
+}
 export type EntityConfig = {
     model: EntityModel,
-    
+
     plural?: string,
-    strategy?: {type: 'mongo'|'static', } | any,
-    service?: any,
-    
+    strategy?: PersistenceStrategy,
+
     publish?: boolean,
+
+    _plugins: Record<string, EntityPluginModule>,
 }
 
 export type EntityInstance = {
+    _id: ObjectId
+
     stats?: Partial<{
         creator: string|null,
         createdAt: Date|null,
@@ -20,12 +39,20 @@ export type EntityInstance = {
     }>,
 }
 
-export type TypefulType = any // TODO: define TypefulType
+export type EntityRef<TEnt extends EntityInstance = EntityInstance> = ObjectId|string // eslint-disable-line @typescript-eslint/no-unused-vars
+
+export type TypefulType<TSpec extends object = Record<string, unknown>> = {
+    validate(value: unknown, spec: TSpec, context?: IntegrityContext, scope?: ValidationScope): boolean,
+    sanitize?(value: unknown, spec: TSpec, ctx?: IntegrityContext, options?: unknown),
+}
+export type TypesModule = {
+    types: Record<string, TypefulType>,
+}
 
 
 export type TypefulModule = {
     types?: Record<string, TypefulType>
     typesPrefix?: string,
-    
+
     entities?: Record<string, EntityConfig>
 }

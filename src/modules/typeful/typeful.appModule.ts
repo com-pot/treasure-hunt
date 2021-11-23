@@ -8,41 +8,43 @@ import TypeRegistry from "./services/TypeRegistry"
 
 import TypefulAccessor from "./services/TypefulAccessor"
 import { ServiceContainer } from "../../app/types/app"
-import {TypefulModule } from "./typeful";
-import AppError from "../../app/AppError";
-import { Dao } from "./services/dao/Daos";
-import DaoFactory from "./services/DaoFactory";
-import MongoDao from "./services/dao/MongoDao";
-import StaticDao from "./services/dao/StaticDao";
+import {EntityModel, TypefulModule } from "./typeful"
+import AppError from "../../app/AppError"
+import { Dao } from "./services/dao/Daos"
+import DaoFactory from "./services/DaoFactory"
+import MongoDao from "./services/dao/MongoDao"
+import StaticDao from "./services/dao/StaticDao"
 
-const initMongoClient = async () => {
-    const client = new MongoClient(process.env.MONGO_URL!)
+const initMongoClient = async (mongoUrl: string) => {
+    const client = new MongoClient(mongoUrl)
     await client.connect()
-    
+
     return client
 }
 
 export type TypefulConfig = {
+    mongo: {
+        url: string,
+    },
     staticDataMask?: string,
 }
 
-
 export const typesPrefix = ''
-export const types = require('./defaultTypesModule').default.types as any
+export const types = require('./defaultTypesModule').default.types // eslint-disable-line @typescript-eslint/no-var-requires
 
 export const compose = async (serviceContainer: ServiceContainer, config: TypefulConfig) => {
     const modules = serviceContainer.modules as Record<string, TypefulModule>
-    
+
     const typeRegistry = new TypeRegistry()
     Object.entries(modules)
         .forEach(([name, module]) => typeRegistry.registerTypes(module, module.typesPrefix ?? name))
     serviceContainer.typeRegistry = typeRegistry
-    
+
     const entityRegistry = new EntityRegistry()
     Object.entries(modules)
         .forEach(([name, module]) => module.entities && entityRegistry.registerModule(name, module))
     serviceContainer.entityRegistry = entityRegistry
-    
+
     serviceContainer.integrityService = new IntegrityService(serviceContainer.typeRegistry)
 
     const daoFactory = new DaoFactory()
@@ -56,27 +58,21 @@ export const compose = async (serviceContainer: ServiceContainer, config: Typefu
     })
 
     serviceContainer.daoFactory = daoFactory
-    
-    serviceContainer.mongoClient = await initMongoClient()
-    serviceContainer.typefulAccessor = new TypefulAccessor(serviceContainer)
-    
-    entityRegistry.entities.forEach((entity) => {
-        const anyEntity = entity as any
-        if (!anyEntity._modules) {
-            return
-        }
 
-        for (const name of Object.keys(anyEntity._modules)) {
-            const module: any = anyEntity._modules[name]
-            if (name === 'service') {
-                if (!module.create) {
-                    console.warn(`Misconfigured entity module ${entity.meta.entityFqn}:${name}`);
-                    continue
-                }
-                entity.service = module.create(serviceContainer.typefulAccessor, entity.meta.entityFqn)   
+    serviceContainer.mongoClient = await initMongoClient(config.mongo.url)
+    serviceContainer.typefulAccessor = new TypefulAccessor(serviceContainer)
+
+    entityRegistry.entities.forEach((entity) => {
+        for (const name of Object.keys(entity._plugins)) {
+            const module = entity._plugins[name]
+            if (name === 'service' && 'create' in module) {
+                entity._plugins.service = module.create(serviceContainer.typefulAccessor, entity.meta.entityFqn)
+                continue
             }
+
+            console.warn(`Misconfigured entity module ${entity.meta.entityFqn}:${name}`)
+
         }
-        delete anyEntity._modules
     })
 }
 
@@ -90,38 +86,38 @@ function registerDaoController(router: Router, ctrl: Dao, ent: EntityConfigEntry
     const collectionEndpoint = `/${ent.meta.module}/${ent.meta.collectionName}`
     const entityEndpoint = `/${ent.meta.module}/${ent.meta.name}`
     const existingEntityEndpoint = entityEndpoint + '/:id'
-    
+
     if (ctrl.list) {
         router.get(collectionEndpoint, async (ctx) => {
-            const result: any = await ctrl.list!(ctx.actionContext)
-            ctx.set('coll-total', result.total)
-            ctx.set('coll-page', result.page)
-            
+            const result = await ctrl.list(ctx.actionContext)
+            ctx.set('coll-total', '' + result.total)
+            ctx.set('coll-page', '' + result.page)
+
             ctx.body = result.items
         })
     }
-    
-    
+
+
     if (ctrl.findOne) {
         router.get(existingEntityEndpoint, async (ctx) => {
-            ctx.body = await ctrl.findOne!(ctx.actionContext, ctx.params.id)
+            ctx.body = await ctrl.findOne(ctx.actionContext, ctx.params.id)
         })
     }
     if (ctrl.create) {
         router.post(entityEndpoint, async (ctx) => {
-            ctx.body = await ctrl.create!(ctx.actionContext, ctx.request.body)
+            ctx.body = await ctrl.create(ctx.actionContext, ctx.request.body)
         })
     }
-    
+
     if (ctrl.update) {
         router.put(existingEntityEndpoint, async(ctx) => {
-            ctx.body = await ctrl.update!(ctx.actionContext, ctx.params.id, ctx.request.body)
+            ctx.body = await ctrl.update(ctx.actionContext, ctx.params.id, ctx.request.body)
         })
     }
-    
+
     if (ctrl.delete) {
         router.delete(existingEntityEndpoint, async(ctx) => {
-            const result = await ctrl.delete!(ctx.actionContext, ctx.params.id)
+            const result = await ctrl.delete(ctx.actionContext, ctx.params.id)
             if (result === true) {
                 ctx.status = 204
                 ctx.body = ''
@@ -138,24 +134,24 @@ function registerDaoController(router: Router, ctrl: Dao, ent: EntityConfigEntry
 function createBackstageRouter(entityRegistry: EntityRegistry, tfa: TypefulAccessor) {
     const router = new Router()
     router.use(ensureJsonRequest())
-    
-    const schemas: Record<string, any> = {}
-    
+
+    const schemas: Record<string, EntityModel> = {}
+
     entityRegistry.entities.forEach((ent) => {
         if (ent.publish === false) {
             return
         }
-        
+
         const ctrl = tfa.getDao(ent.meta.entityFqn)
         registerDaoController(router, ctrl, ent)
-        
+
         schemas[ent.meta.entityFqn] = ent.model
     })
-    
+
     router.get('/schemas/', (ctx) => {
         ctx.body = Object.keys(schemas)
     })
-    
+
     router.get('/schema/:name', (ctx) => {
         const schema = schemas[ctx.params.name]
         if (!schema) {
@@ -163,7 +159,7 @@ function createBackstageRouter(entityRegistry: EntityRegistry, tfa: TypefulAcces
         }
         ctx.body = schema
     })
-    
+
     return router
 }
 

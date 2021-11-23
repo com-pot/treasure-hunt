@@ -1,12 +1,12 @@
-import typeSpec from "../test/typeSpec.js"
-import number from "./number.js"
+import typeSpec from "../test/typeSpec"
+import number from "./number"
 
 describe('types/number', function() {
     const anyConfig = {type: 'number'}
     describe('with config ' + typeSpec.stringify(anyConfig), function() {
         const validValues = [0, 1, -1, 65535, Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER, Number.MAX_VALUE, Number.MIN_VALUE]
         const invalidValues = [true, false, 'hi', null, undefined]
-        const sanitizeCases = [
+        const sanitizeCases: [unknown, unknown][] = [
             [1, 1],
             [0, 0],
             [1.5, 1.5],
@@ -24,7 +24,7 @@ describe('types/number', function() {
     describe('with config ' + typeSpec.stringify(intConfig), function() {
         const validValues = [0, 1, 65535, Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER]
         const invalidValues = [true, false, 'hi', null, undefined, Number.MAX_VALUE, Number.MIN_VALUE]
-        const sanitizeCases = [
+        const sanitizeCases: [unknown, unknown][] = [
             [1, 1],
             [0, 0],
             [1.5, 1],

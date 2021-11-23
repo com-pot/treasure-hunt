@@ -5,6 +5,11 @@ import { Dao } from "./dao/Daos";
 import DaoFactory from "./DaoFactory";
 import { EntityConfigEntry } from "./EntityRegistry";
 
+type DummyDao = {
+    type: 'dummy',
+    config: EntityConfigEntry,
+}
+
 describe('DaoFactory', function() {
 
     const daoFactory = new DaoFactory()
@@ -12,19 +17,19 @@ describe('DaoFactory', function() {
         return {
             type: 'dummy',
             config,
-        } as Dao
+        } as unknown as Dao
     })
 
     it('should create registered type dao', function() {
         const dao = daoFactory.createDao({
             ...dummyItemModelEntry,
-            strategy: {type: 'dummy'},
-        })
+            strategy: {type: 'dummy', primaryKey: 'id'},
+        }) as unknown as DummyDao
 
-        expect((dao as any).config.meta.entityFqn).to.equal('dummy.item')
+        expect((dao).config.meta.entityFqn).to.equal('dummy.item')
     })
 
     it('should throw unregistered type dao', function() {
-        expect(() => daoFactory.createDao({...dummyItemModelEntry, strategy: {type: 'random'}})).to.throw(Error)
+        expect(() => daoFactory.createDao({...dummyItemModelEntry, strategy: {type: 'random', primaryKey: 'id'}})).to.throw(Error)
     })
 })

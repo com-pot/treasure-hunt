@@ -1,8 +1,8 @@
-import typeSpec from "../test/typeSpec.js"
-import schema from "./schema.js"
+import typeSpec from "../test/typeSpec"
+import schema, { SchemaSpec } from "./schema"
 
-describe('types/list', function() {    
-    const schemaConfig = {
+describe('types/list', function() {
+    const schemaConfig: SchemaSpec = {
         type: 'schema',
         fields: {
             name: {type: 'string', defaultValue: 'document'},
@@ -10,7 +10,7 @@ describe('types/list', function() {
             pageCount: {type: 'number'},
         },
     }
-    
+
     describe('simple config - ' + typeSpec.stringify(schemaConfig), function() {
         const validValues = [{format: 'A4'}, {format: 'A4', name: 'Ode to joy'}]
         const invalidValues = [0, 1, -1, 'hi', null, undefined, {pageCount: 6}]
@@ -52,7 +52,7 @@ describe('types/list', function() {
             [{stats: {createdAt: 'now'}, sond: 'meow'}, {stats: {createdAt: 'now'}}],
         ], integrityService)
     })
-    
-    
+
+
     // TODO: Validate and sanitize by innerType
 })

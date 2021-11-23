@@ -1,13 +1,13 @@
 import { Middleware } from "koa";
-import AppError, {isAppError} from "../AppError";
+import {isAppError} from "../AppError";
 
 export default (): Middleware => {
     return async (ctx, next) => {
         try {
             await next();
-        } catch (err: any) {
+        } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
             if (isAppError(err) || err.message === 'not-found') {
-                let status = err.message === 'not-found' && 404;
+                const status = err.message === 'not-found' && 404;
                 ctx.status = status || err.status || 500;
                 ctx.body = {error: err.message};
                 if (err.details) {
@@ -17,8 +17,8 @@ export default (): Middleware => {
                 ctx.status = 500
                 ctx.body = {error: 'unhandled-error'}
             }
-            
-            
+
+
             ctx.app.emit('error', err, ctx); // todo: handle error?
         }
     }

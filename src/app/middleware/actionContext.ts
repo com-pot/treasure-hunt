@@ -1,4 +1,6 @@
 import { Middleware } from "koa/index"
+import { AuthTokenPayload } from "../../modules/auth/auth"
+import { UserEntity } from "../../modules/auth/model/user"
 
 import JwtService from "../../modules/auth/servies/JwtService"
 import TypefulAccessor from "../../modules/typeful/services/TypefulAccessor"
@@ -19,20 +21,21 @@ type ActionContextDevOptions = {
 export default function actionContextFactory(jwtService: JwtService, tfa: TypefulAccessor, devOptions?: ActionContextDevOptions): Middleware {
     return async function actionContext(ctx, next) {
         const authorizationHeader = ctx.request.headers['authorization']
-        let actor = null, roles = []
+        let actor: string|null = null,
+            roles: string[] = []
 
         if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
             const token = authorizationHeader.substr('Bearer '.length)
 
             try {
-                const payload: any = jwtService.parseValid(token)
+                const payload: AuthTokenPayload = jwtService.parseValid(token)
                 actor = payload.login
-            } catch (e) {
-                throw new AppError('token-invalid', 401, {message: (e as any).message})
+            } catch (e: unknown) {
+                throw new AppError('token-invalid', 401, {message: (e as Error).message})
             }
 
-            const users = tfa.getDao('auth.user')
-            const user = await users.findOne!(ctx.actionContext, {login: actor})
+            const users = tfa.getDao<UserEntity>('auth.user')
+            const user = await users.findOne(ctx.actionContext, {login: actor})
             if (!user) {
                 console.warn(`User '${actor}' not found`);
             } else {

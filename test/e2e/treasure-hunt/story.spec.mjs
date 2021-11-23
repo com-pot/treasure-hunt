@@ -1,4 +1,5 @@
-import testUtils from "../../utils/testUtils.js";
+import { expect } from "chai";
+import testUtils from "../../utils/testUtils.mjs";
 
 describe('treasure hunt - story', function () {
     const api = testUtils.useApi()
