@@ -1,10 +1,9 @@
 import { EntityConfigEntry } from "../services/EntityRegistry";
 
 const dummyItemModelEntry: EntityConfigEntry = {
-    model: {
-        
-    },
-    strategy: {primaryKey: 'id'},
+    _plugins: {},
+    model: {},
+    strategy: {type: 'dummy', primaryKey: 'id'},
     meta: {
         collectionFqn: 'dummy.items',
         entityFqn: 'dummy.item',

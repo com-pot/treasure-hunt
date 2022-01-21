@@ -1,4 +1,4 @@
-import jsonwebtoken, {Algorithm} from "jsonwebtoken"
+import jsonwebtoken, {Algorithm, JwtPayload} from "jsonwebtoken"
 
 type JwtServiceOptions = {
     secret: string,
@@ -22,7 +22,7 @@ export default class JwtService {
 
     create(claims: object, options: CreateTokenOptions) {
         const payload = {...claims}
-        let duration = 'duration' in options ? options.duration : (60 * 1000)
+        const duration = 'duration' in options ? options.duration : (60 * 1000)
         if (typeof duration === 'number') {
             Object.assign(payload, {exp: Math.round(Date.now() / 1000) + duration})
         }
@@ -32,7 +32,11 @@ export default class JwtService {
         })
     }
 
-    parseValid(token: string) {
-        return jsonwebtoken.verify(token, this.secret, {algorithms: [this.algorithm]})
+    parseValid<T extends JwtPayload>(token: string): T {
+        const parsed = jsonwebtoken.verify(token, this.secret, {algorithms: [this.algorithm]})
+        if (typeof parsed !== 'object') {
+            throw new Error("Could not parse JWT payload to object")
+        }
+        return parsed as T
     }
 }

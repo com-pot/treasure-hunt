@@ -1,3 +1,5 @@
+import { EntityInstance } from "../../typeful/typeful"
+
 const loginMethod = {
     type: 'schema',
     fields: {
@@ -16,4 +18,13 @@ export default {
             innerType: loginMethod,
         },
     },
+}
+
+export type UserEntity = EntityInstance & {
+    login: string,
+    loginMethods?: {
+        type: string,
+        [opt: string]: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+    }[]
+    roles?: string[]
 }

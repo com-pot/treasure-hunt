@@ -1,10 +1,11 @@
 import { expect } from "chai"
 import dummyItemModelEntry from "../../test/dummyItemModelEntry"
+import { FilterCriteria } from "./Daos"
 import mongoAggregators from "./mongoAggregators"
 
 describe('mongAggregators', function() {
     describe('filter', function() {
-        const cases = [
+        const cases: [FilterCriteria, unknown][] = [
             [
                 420,
                 {id: {$eq: 420}},
@@ -66,7 +67,7 @@ describe('mongAggregators', function() {
         cases.forEach(([arg, expectedOut], i) => {
             it(`#${i + 1}. Prepares ` + JSON.stringify(arg), function() {
                 const actualValue = mongoAggregators.filter(arg, dummyItemModelEntry)
-                
+
                 expect(actualValue).to.deep.equal(expectedOut)
             })
         })

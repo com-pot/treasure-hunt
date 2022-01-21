@@ -1,4 +1,4 @@
-export default {
+module.exports.default = {
     validate(value) {
         return typeof value === "string"
     },

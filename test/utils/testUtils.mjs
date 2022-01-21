@@ -1,8 +1,13 @@
-import ApiAdapter from "./ApiAdapter.js";
+import ApiAdapter from "./ApiAdapter.mjs";
 
 
 let instances = {}
 
+/**
+ *
+ * @param {string} [authToken]
+ * @returns
+ */
 function createTestApi(authToken) {
   const defaultHeaders = {
     Accept: 'application/json',
@@ -11,22 +16,35 @@ function createTestApi(authToken) {
     defaultHeaders.Authorization = 'Bearer ' + authToken
   }
 
+  const baseUrl = process.env.TEST_API_BASE_URL
+  if (!baseUrl) {
+    throw new Error("Missing variable TEST_API_BASE_URL")
+  }
+
   const apiAdapter = new ApiAdapter({
-    baseUrl: process.env.TEST_API_BASE_URL,
+    baseUrl,
     defaultHeaders,
   })
-  apiAdapter.middleware.req.push((/**RequestConfig*/ config) => {
+  apiAdapter.middleware.req.push((config) => {
+    const devAuth = process.env.BACKSTAGE_DEV_AUTH
+    if (!devAuth) {
+      return
+    }
     if (!config.query) {
       config.query = {}
     }
-    config.query['devAuth'] = process.env.BACKSTAGE_DEV_AUTH
+    config.query['devAuth'] = devAuth
   })
 
   return apiAdapter
 }
 
 export default {
-  /** @returns {ApiAdapter} */
+  /**
+   *
+   * @param {true|string} [auth]
+   * @returns {ApiAdapter}
+   */
   useApi(auth) {
     if (auth === true) {
       return instances.testApiAuth || (instances.testApi = createTestApi(process.env.TEST_API_AUTH_TOKEN))
@@ -39,7 +57,10 @@ export default {
   },
 
   /**
+   *
    * @param {ApiAdapter} api
+   * @param {AuthCredentials} credentials
+   * @returns
    */
   async useTestUser(api, credentials) {
     if (!credentials) {
@@ -54,3 +75,10 @@ export default {
     return Object.assign({}, result, credentials)
   },
 }
+
+/**
+ * @typedef {object} AuthCredentials
+ *
+ * @property {string} login
+ * @property {string} pass
+ */

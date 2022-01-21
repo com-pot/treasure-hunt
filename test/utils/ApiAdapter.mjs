@@ -1,8 +1,8 @@
-import fetch from "node-fetch";
+import fetch, {Response} from "node-fetch";
 
 export default class ApiAdapter {
   /**
-   * @param {ApiAdapterConfig} config
+   * @param {AdapterConfig} config
    */
   constructor(config) {
     if (!config) {
@@ -13,6 +13,7 @@ export default class ApiAdapter {
     }
     this._config = config
     this.middleware = {
+      /** @type {RequestMiddleware[]} */
       req: []
     }
   }
@@ -32,6 +33,9 @@ export default class ApiAdapter {
   delete(path, config) {
     return this.makeRequest('delete', path, undefined, config)
   }
+  /**
+   * @returns {ApiAdapter}
+   */
   get json() {
     if (!this._jsonShortcut) {
       this._jsonShortcut = {
@@ -45,33 +49,32 @@ export default class ApiAdapter {
     return this._jsonShortcut
   }
 
+
   /**
    *
-   * @param {'get'|'post'|'put'|'delete'|string} method
+   * @param {HttpMethod} method
    * @param {string} path
-   * @param {Object} [data]
+   * @param {object} [data]
    * @param {RequestConfig} [config]
-   * @returns {Promise<Response>}
+   * @returns
    */
   async makeRequest (method, path, data, config) {
-    if (!config) {
-      config = {}
-    }
+    const opts = Object.assign({}, config)
 
     for (let cb of this.middleware.req) {
-      await cb(config)
+      await cb(opts)
     }
 
     const endpointUrl = new URL(this._config.baseUrl + path)
-    if (config && config.query) {
-      Object.keys(config.query).forEach((key) => endpointUrl.searchParams.append(key, config.query[key]))
+    if (opts.query) {
+      Object.entries(opts.query).forEach(([key, value]) => endpointUrl.searchParams.append(key, '' + value))
     }
-    const headers = Object.assign({}, this._config.defaultHeaders, config && config.headers)
+    const headers = Object.assign({}, this._config.defaultHeaders, opts.headers)
     if (data && typeof data === "object") {
       headers['Content-Type'] = 'application/json'
     }
-    if (config && config.auth) {
-      headers["Authorization"] = 'Bearer ' + config.auth
+    if (opts.auth) {
+      headers["Authorization"] = 'Bearer ' + opts.auth
     }
 
     return fetch(endpointUrl.toString(), {
@@ -82,39 +85,70 @@ export default class ApiAdapter {
   }
 }
 
-const unwrapSuccessfulJson = async (/**Response*/response) => {
+/**
+ *
+ * @param {fetch.Response} response
+ * @returns {Promise<T>}
+ * @template T
+ */
+async function unwrapSuccessfulJson(response) {
   const text = await response.text()
 
   const contentType = response.headers.get('Content-Type') || ""
   if (!contentType.includes('application/json')) {
-    const e = new Error(`Response of ${response.url} is of wrong Content-Type: ${contentType}, Status: ${response.status}\n   ${text}`)
-    e.response = response
-    e.responseBody = text
-    throw e
+    throw new HttpError(`Response of ${response.url} is of wrong Content-Type: ${contentType}, Status: ${response.status}\n   ${text}`, response, text)
   }
 
   const json = JSON.parse(text)
   if (response.status >= 400) {
-    const e = new Error(`Request to ${response.url} failed with status=${response.status}\n  ${text}`)
-    e.response = response
-    e.responseBody = json
-    throw e
+    throw new HttpError(`Request to ${response.url} failed with status=${response.status}\n  ${text}`, response, json)
   }
 
   return json
 }
 
+class HttpError extends Error {
+  /**
+   *
+   * @param {string} message
+   * @param {fetch.Response} [response]
+   * @param {object|string} responseBody
+   */
+  constructor(message, response, responseBody) {
+    super(message)
+
+    this.response = response
+    this.responseBody = responseBody
+  }
+}
+
+
 /**
- * @typedef {Object} RequestConfig
+ * @typedef {object} RequestConfig
  *
  * @property {Record<string, (string|number)>} [query]
  * @property {Record<string, string>} [headers]
  * @property {string} [auth]
  */
-
 /**
- * @typedef {Object} ApiAdapterConfig
+ * @typedef {object} AdapterConfig
  *
  * @property {string} baseUrl
- * @property {Record<string, string>} [defaultHeaders]
+ * @property {Record<string, string|string[]>} [defaultHeaders]
+ */
+
+// type JsonShortcut = {
+//   get(path: string, config?: RequestConfig): any,
+//   post(path: string, data?: object, config?: RequestConfig): any,
+//   put(path: string, data?: object, config?: RequestConfig): any,
+//   patch(path: string, data?: object, config?: RequestConfig): any,
+//   delete(path: string, config?: RequestConfig): any,
+// }
+/**
+ * @typedef {'get'|'post'|'put'|'delete'|string} HttpMethod
+ */
+/**
+ * @typedef {function} RequestMiddleware
+ *
+ * @param {RequestConfig} config
  */

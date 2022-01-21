@@ -1,14 +1,17 @@
 import glob from "glob"
 import path from "path"
 
+type ConfigRootValue = Record<string, ConfigValue>
+type ConfigValue = object|string|number|boolean|null
+
 export default class Config {
-    constructor(public readonly data: Record<string, object>) {
+    constructor(public readonly data: Record<string, ConfigRootValue>) {
 
     }
 }
 
 export const loadFromFiles = async(dir: string): Promise<Config> => {
-    const config: Record<string, any> = {}
+    const config: Record<string, ConfigRootValue> = {}
 
     const files = glob.sync('*.@(js|ts|json)', {
         cwd: dir,

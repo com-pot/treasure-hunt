@@ -1,10 +1,10 @@
-import typeSpec from "../test/typeSpec.js"
-import list from "./list.js"
+import typeSpec from "../test/typeSpec"
+import list from "./list"
 
 describe('types/list', function() {
     const validValues = [[1, 2], []]
     const invalidValues = [0, 1, -1, 'hi', null, undefined]
-    
+
     const anyConfig = {type: 'list'}
     typeSpec.validateType(list, anyConfig, validValues, invalidValues)
     typeSpec.sanitizeValues(list, anyConfig, [

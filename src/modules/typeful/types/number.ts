@@ -1,4 +1,6 @@
-export default {
+import { TypefulType } from "../typeful"
+
+const t: TypefulType = {
     validate(value, options) {
         if (typeof value !== 'number' || Number.isNaN(value)) {
             return false
@@ -6,11 +8,11 @@ export default {
         if (options.mode === 'int') {
             return Number.isSafeInteger(value)
         }
-        
+
         return true
     },
     sanitize(value, options) {
-        let number = Number(value)
+        const number = Number(value)
         if (value === undefined) {
             return undefined
         }
@@ -20,7 +22,8 @@ export default {
         if (options.mode === 'int') {
             return Math.floor(number)
         }
-        
+
         return number
     },
 }
+export default t

@@ -14,7 +14,7 @@ export const getModules = async (dir: string): Promise<Record<string, AppModule>
     const modules = await Promise.all(files.map(async (file) => {
         const moduleDir = path.dirname(file)
         const name = path.parse(file).base.replace(/\.appModule\.(js|ts)$/, '')
-        
+
         const module = {...await import(file) as TypefulModule}
 
         module.entities = await initializeEntities(dir, moduleDir, module.entities)
@@ -26,15 +26,15 @@ export const getModules = async (dir: string): Promise<Record<string, AppModule>
                 }
             })
         }
-        
-        
+
+
         return [name, module]
     }))
 
     return Object.fromEntries(modules)
 }
 
-const initializeEntities = async (cwd: string, moduleDir: string, entities?: Record<string, EntityConfig>) => {
+const initializeEntities = async (cwd: string, moduleDir: string, entities?: Record<string, Partial<EntityConfig>>): Promise<Record<string, EntityConfig>> => {
     if (!entities) {
         entities = {}
     }
@@ -50,34 +50,49 @@ const initializeEntities = async (cwd: string, moduleDir: string, entities?: Rec
             console.warn("Misclassified file " + path);
             continue
         }
-        
+
         const entityName = match[2]
         const type = match[4] || 'model'
 
         if (!entities[entityName]) {
-            entities[entityName] = {} as any
+            entities[entityName] = {}
         }
 
-        const entity = entities[entityName] as any
-        if (!entity._modules) {
-            entity._modules = {}
+        const entity: Partial<EntityConfig> = entities[entityName]
+        if (!entity._plugins) {
+            entity._plugins = {}
         }
 
-        if (entity[type] || entity._modules[type]) {
+        if (entity._plugins[type]) {
             console.warn(`File '${path}' should be a ${type} but the entity config already has this field configured. Ignoring file.`);
             continue
         }
-        
+
         initFilePromises.push(import(path).then((module) => {
-            if (module.default) {
-                entity[type] = module.default
+            if (!entity._plugins) {
+                console.warn(`Failed to initialize module '${type}' on entity ${entityName}`)
+                return
+            }
+
+            const moduleContent = module.default ?? module
+            if (type === 'model') {
+                entity.model = moduleContent
             } else {
-                entity._modules[type] = module
+                entity._plugins[type] = moduleContent
             }
         }))
     }
 
     await Promise.all(initFilePromises)
 
-    return Object.keys(entities).length ? entities : undefined
+    const validEntityEntries = Object.entries(entities)
+        .filter(([name, config]) => {
+            if (!config.model) {
+                console.warn(`Entity '${name}' did not load properly, ignoring`);
+                return false
+            }
+            return true
+        }) as [string, EntityConfig][]
+
+    return Object.fromEntries(validEntityEntries)
 }

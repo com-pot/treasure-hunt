@@ -1,10 +1,15 @@
 export default class AppError extends Error {
-    constructor(message: string, public readonly status: number = 500, public readonly details?: any)
+    constructor(message: string, public readonly status: number = 500, public readonly details?: object|string)
     {
         super(message)
     }
 }
 
-export const isAppError = (e: any): e is AppError =>  {
-    return e instanceof AppError || typeof e === "object" && typeof e.status === "number"
+// we want to check type of given argument
+export const isAppError = (e: any): e is AppError =>  { // eslint-disable-line @typescript-eslint/no-explicit-any
+    if (!e || typeof e !== 'object') {
+        return false
+    }
+
+    return e instanceof AppError || typeof e.status === "number"
 }
