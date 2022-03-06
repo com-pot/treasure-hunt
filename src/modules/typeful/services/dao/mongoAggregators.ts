@@ -1,33 +1,30 @@
 import { Filter, Document, Condition, ObjectId } from "mongodb"
 import AppError from "../../../../app/AppError"
 import { EntityConfigEntry } from "../EntityRegistry"
-import { AggregationTask, FilterCriteria, GroupAggregation, isMatchOperatorArg, MatchAggregation, MatchObjectInfer, MatchOperatorArgument } from "./Daos"
+import { isEntityInstance } from "../SchemaService"
+import { AggregationTask, FilterCriteria, GroupAggregation, isMatchOperator, MatchAggregation, MatchObjectInfer, MatchOperatorArgument } from "./Daos"
 
 export const filter = (findBy: FilterCriteria|undefined, config: EntityConfigEntry): Filter<Document> => {
-    if (!findBy) {
-        return {}
-    }
-
     const $match: Filter<Document> = {}
-    if (typeof findBy !== "object" || findBy instanceof ObjectId) {
-        const field = config.strategy.primaryKey || 'id'
-        createCondition($match, field, 'eq', findBy)
+
+    if (findBy === undefined || findBy === null) {
         return $match
     }
-    if (Array.isArray(findBy)) {
-        if (!findBy.length) {
-            return $match
-        }
 
-        if (isMatchOperatorArg(findBy)) {
-            parseArrFilter($match, findBy)
-        } else {
-            findBy.forEach((criteria) => Array.isArray(criteria) ? parseArrFilter($match, criteria) : parseObjectQuery($match, criteria))
-        }
-
-    } else {
-        parseObjectQuery($match, findBy)
+    if (isMatchOperator(findBy)) {
+        findBy.forEach((arg) => parseArrFilter($match, arg))
+        return $match
     }
+
+    if (typeof findBy === 'object' && !Array.isArray(findBy) && !(findBy instanceof ObjectId) && !isEntityInstance(findBy)) {
+        Object.entries(findBy)
+            .forEach(([field, args]) => createCondition($match, field, args))
+
+        return $match
+    }
+
+    const field = config.strategy.primaryKey || 'id'
+    createCondition($match, field, findBy)
 
     return $match
 }
@@ -102,16 +99,19 @@ const sanitizeArgs = (args: unknown): unknown => {
 
     return args
 }
-const createCondition = ($match: Filter<Document>, field: string, op: string, args: unknown): Condition<unknown> => {
+const createCondition = ($match: Filter<Document>, field: string, args: unknown, op?: string): Condition<unknown> => {
+    if (!op) {
+        op = inferOperatorByArg(args)
+    }
+
     const conditionFn = operatorToCondMappers[op]
     if (!conditionFn) {
         throw new AppError('unsupported-operator', undefined, {field, op})
     }
 
-    let polarity = true
-    if (field.charAt(0) === '!') {
+    const polarity = field.charAt(0) !== '!'
+    if (!polarity) {
         field = field.substring(1)
-        polarity = false
     }
 
     const argsSanitized = sanitizeArgs(args)
@@ -130,17 +130,11 @@ const parseArrFilter = ($match: Filter<Document>, query: MatchOperatorArgument) 
     }
 
     const [field, op, args] = query
-    createCondition($match, field, op, args)
+    createCondition($match, field, args, op)
 }
 const inferOperatorByArg = (args: unknown) => {
     if (Array.isArray(args)) {
         return 'in'
     }
     return 'eq'
-}
-const parseObjectQuery = ($match: Filter<Document>, findBy: MatchObjectInfer) => {
-    Object.entries(findBy).forEach(([field, args]) => {
-        const op = inferOperatorByArg(args)
-        createCondition($match, field, op, args)
-    })
 }

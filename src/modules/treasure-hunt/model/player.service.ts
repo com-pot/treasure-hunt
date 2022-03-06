@@ -49,7 +49,7 @@ export const create = (tfa: TypefulAccessor, model: string) => {
             const playerIds = Object.values(players).map((p) => p._id)
 
             const trophies = await trophiesCollection.aggregate<{player: ObjectId}>(action, [
-                {type: 'match', match: [{player: playerIds}]}
+                {type: 'match', match: {player: playerIds}}
             ])
             const trophyiesByPlayer = Object.fromEntries(trophies.map((trophy) => {
                 return [trophy.player, trophy]

@@ -1,5 +1,5 @@
 import AppError from "../../../app/AppError";
-import { EntityModel, FieldModel } from "../typeful";
+import { EntityModelSchema, FieldModel } from "../typeful";
 import TypeRegistry from "./TypeRegistry";
 
 export type IntegrityContext = {
@@ -34,7 +34,7 @@ export default class IntegrityService {
         return type.validate(subject, spec, this._integrityContext, scope)
     }
 
-    sanitize<T>(spec: EntityModel, subject: T, options: SanitizeOptions = {}): T {
+    sanitize<T>(spec: EntityModelSchema, subject: T, options: SanitizeOptions = {}): T {
         const type = this.typeRegistry.get(spec.type)
 
         if (!type) {

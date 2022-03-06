@@ -44,7 +44,7 @@ export default function actionContextFactory(jwtService: JwtService, tfa: Typefu
         }
 
         ctx.actionContext = {
-            tenant: process.env.TENANT_NAME, // TODO: this might be decided based on routes or different logic
+            tenant: ctx.request.header['tenant'] || process.env.TENANT_NAME,
             actor,
             actorRoles: roles,
             moment: new Date(),

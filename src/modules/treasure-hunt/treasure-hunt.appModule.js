@@ -68,17 +68,17 @@ const createBackstageRouter = (serviceContainer) => {
 
     const dashCtrl = new DashboardController(serviceContainer.typefulAccessor)
 
-    router.get('/dashboard/players', async (ctx) => {
-        ctx.body = await dashCtrl.getPlayersDashboard(ctx.actionContext)
+    router.get('/dashboard/story/:story/players', async (ctx) => {
+        ctx.body = await dashCtrl.getPlayersDashboard(ctx.actionContext, ctx.params.story)
     })
 
-    router.post('/dashboard/player/:login/trophy/redeem', async (ctx) => {
+    router.post('/dashboard/story/:story/player/:login/trophy/redeem', async (ctx) => {
         ctx.body = {
             trophy: await dashCtrl.redeemTrophy(ctx.actionContext, ctx.params.login),
         }
     })
 
-    router.get('/dashboard/story', async (ctx) => {
+    router.get('/dashboard/story/:story', async (ctx) => {
         ctx.body = await dashCtrl.getStoryDashboard(ctx.actionContext, ctx.query.story)
     })
 
@@ -92,10 +92,10 @@ export const startUp = async (serviceContainer) => {
 
     serviceContainer.eventBus.on('auth.user-registered', function({action, user, promises}) {
         const playerModel = serviceContainer.typefulAccessor.getModel('treasure-hunt.player')
-        const createPlayerPromise = playerModel.createPlayer(action, user.login, 'sotw')
+        const createPlayerPromise = playerModel.createPlayer(action, user.login, action.storyName)
         promises && promises.push(createPlayerPromise)
     })
-    
+
     const playerRouter = createPlayerRouter(serviceContainer)
     router.use(playerRouter.routes(), playerRouter.allowedMethods())
 

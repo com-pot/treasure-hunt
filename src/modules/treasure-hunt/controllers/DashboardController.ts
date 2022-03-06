@@ -13,10 +13,10 @@ export default class DashboardController {
 
     }
 
-    async getPlayersDashboard(actionContext: ActionContext) {
+    async getPlayersDashboard(actionContext: ActionContext, story: string) {
         const playerService = this.tfa.getModel<PlayerService>('treasure-hunt.player')
 
-        const players = await playerService.dao.list(actionContext, undefined, undefined, {page: 1, perPage: 200})
+        const players = await playerService.dao.list(actionContext, {story}, undefined, {page: 1, perPage: 200})
 
         const playersWithChallenges = await playerService.withCurrentChallenge(actionContext, players.items)
         const playersWithTrophies = await playerService.withTrophies(actionContext, playersWithChallenges)

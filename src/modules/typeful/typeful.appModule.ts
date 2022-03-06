@@ -8,12 +8,13 @@ import TypeRegistry from "./services/TypeRegistry"
 
 import TypefulAccessor from "./services/TypefulAccessor"
 import { ServiceContainer } from "../../app/types/app"
-import {EntityModel, TypefulModule } from "./typeful"
+import {EntityModelSchema, TypefulModule } from "./typeful"
 import AppError from "../../app/AppError"
-import { Dao } from "./services/dao/Daos"
+import { Dao, FilterCriteria } from "./services/dao/Daos"
 import DaoFactory from "./services/DaoFactory"
 import MongoDao from "./services/dao/MongoDao"
 import StaticDao from "./services/dao/StaticDao"
+import { createFilterCriteria } from "./services/SchemaService"
 
 const initMongoClient = async (mongoUrl: string) => {
     const client = new MongoClient(mongoUrl)
@@ -27,6 +28,18 @@ export type TypefulConfig = {
         url: string,
     },
     staticDataMask?: string,
+}
+type EntityEndpoints = {
+    entityAny: string,
+    entityExact: string,
+    collection: string,
+}
+
+type SchemaIndexEntry = {
+    name: string,
+    endpoints: EntityEndpoints,
+    schema: EntityModelSchema,
+    primaryKey: string,
 }
 
 export const typesPrefix = ''
@@ -82,14 +95,11 @@ export const startUp = async (serviceContainer: ServiceContainer) => {
     }
 }
 
-function registerDaoController(router: Router, ctrl: Dao, ent: EntityConfigEntry) {
-    const collectionEndpoint = `/${ent.meta.module}/${ent.meta.collectionName}`
-    const entityEndpoint = `/${ent.meta.module}/${ent.meta.name}`
-    const existingEntityEndpoint = entityEndpoint + '/:id'
 
+function registerDaoController(ent: EntityConfigEntry, router: Router, ctrl: Dao, endpoints: EntityEndpoints) {
     if (ctrl.list) {
-        router.get(collectionEndpoint, async (ctx) => {
-            const result = await ctrl.list(ctx.actionContext)
+        router.get(endpoints.collection, async (ctx) => {
+            const result = await ctrl.list(ctx.actionContext, createFilterCriteria(ent, ctx.query))
             ctx.set('coll-total', '' + result.total)
             ctx.set('coll-page', '' + result.page)
 
@@ -99,24 +109,24 @@ function registerDaoController(router: Router, ctrl: Dao, ent: EntityConfigEntry
 
 
     if (ctrl.findOne) {
-        router.get(existingEntityEndpoint, async (ctx) => {
-            ctx.body = await ctrl.findOne(ctx.actionContext, ctx.params.id)
+        router.get(endpoints.entityExact, async (ctx) => {
+            ctx.body = await ctrl.findOne(ctx.actionContext, createFilterCriteria(ent, ctx.query, ctx.params.id))
         })
     }
     if (ctrl.create) {
-        router.post(entityEndpoint, async (ctx) => {
+        router.post(endpoints.entityAny, async (ctx) => {
             ctx.body = await ctrl.create(ctx.actionContext, ctx.request.body)
         })
     }
 
     if (ctrl.update) {
-        router.put(existingEntityEndpoint, async(ctx) => {
+        router.put(endpoints.entityExact, async(ctx) => {
             ctx.body = await ctrl.update(ctx.actionContext, ctx.params.id, ctx.request.body)
         })
     }
 
     if (ctrl.delete) {
-        router.delete(existingEntityEndpoint, async(ctx) => {
+        router.delete(endpoints.entityExact, async(ctx) => {
             const result = await ctrl.delete(ctx.actionContext, ctx.params.id)
             if (result === true) {
                 ctx.status = 204
@@ -135,7 +145,7 @@ function createBackstageRouter(entityRegistry: EntityRegistry, tfa: TypefulAcces
     const router = new Router()
     router.use(ensureJsonRequest())
 
-    const schemas: Record<string, EntityModel> = {}
+    const schemas: Record<string, SchemaIndexEntry> = {}
 
     entityRegistry.entities.forEach((ent) => {
         if (ent.publish === false) {
@@ -143,13 +153,19 @@ function createBackstageRouter(entityRegistry: EntityRegistry, tfa: TypefulAcces
         }
 
         const ctrl = tfa.getDao(ent.meta.entityFqn)
-        registerDaoController(router, ctrl, ent)
+        const endpoints = createEntityEndpoints(ent)
+        registerDaoController(ent, router, ctrl, endpoints)
 
-        schemas[ent.meta.entityFqn] = ent.model
+        schemas[ent.meta.entityFqn] = {
+            name: ent.meta.entityFqn,
+            endpoints,
+            schema: ent.model,
+            primaryKey: ent.strategy.primaryKey,
+        }
     })
 
     router.get('/schemas/', (ctx) => {
-        ctx.body = Object.keys(schemas)
+        ctx.body = Object.values(schemas)
     })
 
     router.get('/schema/:name', (ctx) => {
@@ -163,3 +179,12 @@ function createBackstageRouter(entityRegistry: EntityRegistry, tfa: TypefulAcces
     return router
 }
 
+function createEntityEndpoints(ent: EntityConfigEntry): EntityEndpoints {
+    const entityAny = `/${ent.meta.module}/${ent.meta.name}`
+
+    return {
+        entityAny,
+        entityExact: entityAny + '/:id',
+        collection: `/${ent.meta.module}/${ent.meta.collectionName}`,
+    }
+}

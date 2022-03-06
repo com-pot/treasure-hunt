@@ -7,7 +7,7 @@ export type FieldModel = {
     required?: boolean,
     defaultValue?: unknown,
 }
-export type EntityModel = FieldModel & SchemaSpec
+export type EntityModelSchema = FieldModel & SchemaSpec
 
 type EntityPluginModule = object | {create: (...any) => any } // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -16,7 +16,7 @@ export type PersistenceStrategy = {
     primaryKey: string,
 }
 export type EntityConfig = {
-    model: EntityModel,
+    model: EntityModelSchema,
 
     plural?: string,
     strategy?: PersistenceStrategy,
@@ -39,7 +39,7 @@ export type EntityInstance = {
     }>,
 }
 
-export type EntityRef<TEnt extends EntityInstance = EntityInstance> = ObjectId|string // eslint-disable-line @typescript-eslint/no-unused-vars
+export type EntityRef<TEnt extends EntityInstance = EntityInstance> = ObjectId|string
 
 export type TypefulType<TSpec extends object = Record<string, unknown>> = {
     validate(value: unknown, spec: TSpec, context?: IntegrityContext, scope?: ValidationScope): boolean,

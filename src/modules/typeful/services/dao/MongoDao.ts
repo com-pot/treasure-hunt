@@ -90,20 +90,28 @@ export default class MongoDao<T extends EntityInstance> implements Dao<T> {
 
     async update(action: ActionContext, filter: FilterCriteria, data: T) {
         const query = mongoAggregators.filter(filter, this.config)
-        const item = await this.collection.findOne(query) as T
-        if (!item) {
-            throw new Error('not-found')
+        const existingItem = await this.collection.findOne(query) as T
+        if (!existingItem) {
+            console.warn("Update did not find item for", query, ", creating new item");
         }
+        const item = existingItem || {}
 
         const stats = item.stats
         merge(item, data)
         this.integrityService.sanitize(this.config.model, item)
         item.stats = stats || {}
 
+        if (!existingItem) {
+            item.stats.creator = action.actor
+            item.stats.createdAt = action.moment
+        }
+
         item.stats.editor = action.actor
         item.stats.editedAt = action.moment
 
-        const result = await this.collection.replaceOne(query, item)
+        const result = existingItem
+            ? await this.collection.replaceOne(query, item)
+            : await this.collection.insertOne(item)
         if (!result.acknowledged) {
             throw new Error('update-error.unacknowledged')
         }

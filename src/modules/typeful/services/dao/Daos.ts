@@ -1,9 +1,13 @@
 import { ObjectId } from "mongodb"
 import { ActionContext } from "../../../../app/middleware/actionContext"
-import { EntityInstance } from "../../typeful"
+import { EntityInstance, EntityRef } from "../../typeful"
 
-export type ArgumentValue = number|string|ObjectId
-export type FilterCriteria = ArgumentValue | MatchArg | MatchArg[]
+export type ArgumentValue = number | string | boolean | string[] | number[] | EntityRef | EntityRef[] | EntityInstance
+export type MatchObjectInfer = Record<string, ArgumentValue>
+/** [field, operator] | [field, operator, argument] */
+export type MatchOperatorArgument = [string, string] | [string, string, ArgumentValue]
+
+export type FilterCriteria = ArgumentValue | MatchObjectInfer | MatchOperatorArgument[]
 export type SortOrder = Record<string, 1|-1>
 export type Pagination = {
     page: number,
@@ -12,10 +16,9 @@ export type Pagination = {
 }
 export type PaginationParam = Omit<Pagination, 'totalItems'>
 
-export type MatchObjectInfer = Record<string, string|number|object>
-/** [field, operator] | [field, operator, argument] */
-export type MatchOperatorArgument = [string, string] | [string, string, ArgumentValue|ArgumentValue[]]
-export type MatchArg = MatchObjectInfer | MatchOperatorArgument
+export const isMatchOperator = (subject: unknown): subject is MatchOperatorArgument[] => {
+    return Array.isArray(subject) && subject.every((item) => isMatchOperatorArg(item))
+}
 export const isMatchOperatorArg = (subject: unknown): subject is MatchOperatorArgument => {
     if (!Array.isArray(subject)) {
         return false
@@ -25,7 +28,7 @@ export const isMatchOperatorArg = (subject: unknown): subject is MatchOperatorAr
 
 export type MatchAggregation = {
     type: 'match',
-    match: MatchArg[]
+    match: MatchOperatorArgument[] | MatchObjectInfer,
 }
 type FieldAccumulator = {op: string, arg?: string}
 
