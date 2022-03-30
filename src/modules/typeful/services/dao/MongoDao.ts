@@ -42,7 +42,7 @@ export default class MongoDao<T extends EntityInstance> implements Dao<T> {
         const total = await this.collection.countDocuments(query)
 
         return {
-            page,
+            page, perPage,
             total,
             items,
         }
@@ -57,12 +57,12 @@ export default class MongoDao<T extends EntityInstance> implements Dao<T> {
 
     async create(action: ActionContext, data: CreateRequest<T>) {
         const validationScope = {errors: []}
-        if (!this.integrityService.validate(this.config.model, data, validationScope)) {
+        if (!this.integrityService.validate(this.config.schema, data, validationScope)) {
             throw new AppError('invalid-data', 400, {details: {errors: validationScope.errors}})
         }
 
 
-        const sanitized = this.integrityService.sanitize(this.config.model, data) as T
+        const sanitized = this.integrityService.sanitize(this.config.schema, data) as T
 
         sanitized.stats = {
             creator: action.actor,
@@ -98,7 +98,7 @@ export default class MongoDao<T extends EntityInstance> implements Dao<T> {
 
         const stats = item.stats
         merge(item, data)
-        this.integrityService.sanitize(this.config.model, item)
+        this.integrityService.sanitize(this.config.schema, item)
         item.stats = stats || {}
 
         if (!existingItem) {

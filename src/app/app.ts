@@ -39,8 +39,8 @@ export const createApp = async () => {
     backstageRouter.use(requireBackstageManager())
 
     const allReady = Object.entries(modules).map(async ([, module]) => {
-        const moduleData = await (module.startUp && module.startUp(serviceContainer))
-        const router = module.router || (moduleData && moduleData.router)
+        const moduleData = await (module.startUp?.(serviceContainer))
+        const router = module.router || (moduleData?.router)
         if (router) {
             appRouter.use(router.routes())
             appRouter.use(router.allowedMethods())

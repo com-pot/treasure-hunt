@@ -1,5 +1,6 @@
 import path from "path"
 import glob from "glob"
+import { get } from "lodash"
 
 import { ActionContext } from "../../../../app/middleware/actionContext"
 import { EntityInstance } from "../../typeful"
@@ -7,45 +8,44 @@ import { Dao, FilterCriteria } from "./Daos"
 import { EntityConfigEntry } from "../EntityRegistry"
 import AppError from "../../../../app/AppError"
 
-type StaticStrategy<T> = {
-    type: 'static',
-    primaryKey: string,
-    formatItem?: (item: Partial<T>) => T,
-}
 
 export default class StaticDao<T extends EntityInstance> implements Dao<T> {
-    private readonly strategy: StaticStrategy<T>
+
+    private itemList: T[]|null = null
 
     constructor(private readonly config: EntityConfigEntry, private dataDirMask: string) {
-        this.strategy = (config.strategy || {type: 'static'}) as StaticStrategy<T>
+
+    }
+
+    public overrideItems(items: T[]) {
+        if (!Array.isArray(items)) {
+            throw new Error('Invalid overrideItems argument')
+        }
+
+        this.itemList = items
     }
 
     async list(actionContext: ActionContext) {
         let items = await this.loadItems(actionContext)
-        if (this.strategy.formatItem) {
-            items = await Promise.all(items.map(this.strategy.formatItem))
-        }
 
         return {
             page: 1,
+            perPage: 0,
             total: items.length,
             items: items,
         }
     }
 
     async findOne(actionContext: ActionContext, criteria: FilterCriteria) {
-        const key = this.strategy.primaryKey as keyof T
+        const key = this.config.primaryKey as keyof T
         const items = await this.loadItems(actionContext)
         if (typeof criteria !== 'object') {
             criteria = {[key]: criteria}
         }
 
         let item = items.find((check) => {
-            return Object.entries(criteria).every(([name, value]) => check[name as keyof T] === value)
+            return Object.entries(criteria).every(([name, value]) => get(check, name) === value)
         }) as T
-        if (item && this.strategy.formatItem) {
-            item = await this.strategy.formatItem(item)
-        }
 
         return item
     }
@@ -56,19 +56,23 @@ export default class StaticDao<T extends EntityInstance> implements Dao<T> {
     }
 
     create(): Promise<T> {
-        return Promise.reject(new AppError('not-implemented', 501))
+        return rejectStaticModification()
     }
     update(): Promise<T> {
-        return Promise.reject(new AppError('not-implemented', 501))
+        return rejectStaticModification()
     }
     delete(): Promise<boolean | { result: string; }> {
-        return Promise.reject(new AppError('not-implemented', 501))
+        return rejectStaticModification()
     }
     aggregate<TAggr = unknown>(): Promise<TAggr[]> {
-        return Promise.reject(new AppError('not-implemented', 501))
+        return rejectStaticModification()
     }
 
     private async loadItems(actionContext: ActionContext): Promise<T[]> {
+        if (this.itemList) {
+            return Promise.resolve(this.itemList)
+        }
+
         const mask = this.dataDirMask.replace('$tenantName', actionContext.tenant)
 
         const dataFilePattern = path.resolve(mask, this.config.meta.module, this.config.meta.name) + '.@(js|ts|json)'
@@ -78,7 +82,7 @@ export default class StaticDao<T extends EntityInstance> implements Dao<T> {
         })[0]
 
         if (!file) {
-            throw new Error(`No file for '${this.config.meta.entityFqn}'`)
+            return Promise.reject(new Error(`No file for '${this.config.meta.entityFqn}'`))
         }
 
         const ext = path.extname(file)
@@ -90,3 +94,5 @@ export default class StaticDao<T extends EntityInstance> implements Dao<T> {
         return data.collection
     }
 }
+
+const rejectStaticModification = () => Promise.reject(new AppError('not-allowed', 403, {reason: 'static-collection-modification-prevented'}))

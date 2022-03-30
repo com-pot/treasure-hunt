@@ -4,7 +4,8 @@ import { expect } from "chai"
 import defaultTypesModule from "../defaultTypesModule"
 import IntegrityService from "../services/IntegrityService"
 import TypeRegistry from "../services/TypeRegistry"
-import { FieldModel, TypefulType } from "../typeful"
+import { TypefulType } from "../typeful"
+import { SchemaField } from "../typeSystem"
 
 export const stringify = (value: unknown): string => {
     if (Array.isArray(value)) {
@@ -25,7 +26,7 @@ export const stringify = (value: unknown): string => {
 
 export default {
     stringify,
-    validateType<TSpec extends FieldModel>(typeObj: TypefulType<TSpec>, typeConfig: TSpec,
+    validateType<TSpec extends SchemaField>(typeObj: TypefulType<TSpec>, typeConfig: TSpec,
          validValues: unknown[], invalidValues: unknown[], integrityService?: IntegrityService): void {
         describe(`validate`, function() {
             const evalValidity = (value: unknown) => integrityService
@@ -46,7 +47,7 @@ export default {
 
     },
 
-    sanitizeValues<TSpec extends FieldModel>(typeObj: TypefulType<TSpec>, typeConfig: TSpec, sanitizeCases: [unknown, unknown][], integrityService?: IntegrityService) {
+    sanitizeValues<TSpec extends SchemaField>(typeObj: TypefulType<TSpec>, typeConfig: TSpec, sanitizeCases: [unknown, unknown][], integrityService?: IntegrityService) {
         describe('sanitize', function() {
             sanitizeCases.forEach(([unsafeValue, expectedValue]) => {
                 it(`sanitizes '${stringify(unsafeValue)}' to '${stringify(expectedValue)}'`, function() {

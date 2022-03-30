@@ -6,42 +6,24 @@ const DashboardController = require('./controllers/DashboardController').default
 
 export const entities = {
     player: {
-        strategy: {
-            primaryKey: 'login',
-        }
+        primaryKey: 'login',
     },
     story: {
         plural: 'stories',
     },
     'story-part': {
-        strategy: {
-            primaryKey: 'slug',
-        },
+        primaryKey: 'slug',
     },
     'challenge-type': {
-        strategy: {
-            type: 'static',
-            primaryKey: 'type',
-        },
+        primaryKey: 'type',
+        persistence: 'static',
     },
     challenge: {
-        strategy: {
-            type: 'static',
-            formatItem: async (challenge) => {
-                let challengeConfig = challenge.challengeConfig
-                if (typeof challenge.challengeConfig === "function") {
-                    challengeConfig = await challengeConfig()
-                }
-
-                return {
-                    ...challenge,
-                    challengeConfig,
-                }
-            },
-        },
+        stringify: {
+            template: '{{name}} [{{id}}]',
+        }
     },
 }
-
 
 const createPlayerRouter = (serviceContainer) => {
     const router = new Router()
@@ -92,7 +74,7 @@ export const startUp = async (serviceContainer) => {
 
     serviceContainer.eventBus.on('auth.user-registered', function({action, user, promises}) {
         const playerModel = serviceContainer.typefulAccessor.getModel('treasure-hunt.player')
-        const createPlayerPromise = playerModel.createPlayer(action, user.login, action.storyName)
+        const createPlayerPromise = playerModel.createPlayer(action, user.login, action.tenant)
         promises && promises.push(createPlayerPromise)
     })
 
@@ -103,4 +85,8 @@ export const startUp = async (serviceContainer) => {
         router,
         backstageRouter: createBackstageRouter(serviceContainer),
     }
+}
+
+export const plugins = {
+    executive: require('./treasure-hunt.executiveModule').default
 }

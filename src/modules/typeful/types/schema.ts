@@ -1,10 +1,17 @@
-import { FieldModel, TypefulType } from "../typeful"
+import { defineTypefulType, TypefulType } from "../typeful"
+import { SchemaField } from "../typeSystem"
 
-export type SchemaSpec = FieldModel & {
-    fields: Record<string, FieldModel>,
+export type SchemaSpec = SchemaField & {
+    type: 'schema',
+    fields: Record<string, SchemaField>,
+}
+type SchemaValue = Record<string, unknown>
+
+export const isSchemaSpec = (subj: SchemaField): subj is SchemaSpec => {
+    return subj.type === 'schema' && 'fields' in subj
 }
 
-const typeObj: TypefulType<SchemaSpec> = {
+export default defineTypefulType<SchemaSpec>({
     validate(value, options, ctx, scope) {
         if (!scope) {
             scope = {}
@@ -27,7 +34,7 @@ const typeObj: TypefulType<SchemaSpec> = {
                 continue
             }
 
-            let validateField: (value: unknown, spec: FieldModel) => boolean = () => true
+            let validateField: (value: unknown, spec: SchemaField) => boolean = () => true
             if (ctx && ctx.integrity) {
                 validateField = (fieldValue, field) => {
                     return ctx.integrity.validate(field, fieldValue) === true
@@ -41,18 +48,18 @@ const typeObj: TypefulType<SchemaSpec> = {
 
         return !errors.length
     },
-    sanitize(value, options, ctx, sanitizeOptions: Record<string, unknown>) {
+    sanitize(value, options, ctx, sanitizeOptions) {
         if (!value || typeof value !== "object") {
             return
         }
 
-        const obj = value as object
+        const obj = value as SchemaValue
 
         Object.keys(obj).forEach((name) => {
             if (!options.fields[name]) {
                 const allowlist = sanitizeOptions?.allowlist
                 if (!allowlist || !Array.isArray(allowlist) || !allowlist.includes(name)) {
-                    delete obj[name as keyof typeof value]
+                    delete obj[name as keyof typeof obj]
                 }
             }
         })
@@ -63,7 +70,7 @@ const typeObj: TypefulType<SchemaSpec> = {
                 obj[key] = field.defaultValue as never
             }
 
-            if (ctx) {
+            if (ctx && 'fields' in field) {
                 const sanitized = obj[key] === undefined ? undefined : ctx.integrity.sanitize(field, obj[key], options)
                 if (sanitized !== undefined) {
                     obj[key] = sanitized
@@ -73,6 +80,4 @@ const typeObj: TypefulType<SchemaSpec> = {
 
         return obj
     },
-}
-
-export default typeObj
+})

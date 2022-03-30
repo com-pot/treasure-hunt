@@ -2,7 +2,7 @@ import { Filter, Document, Condition, ObjectId } from "mongodb"
 import AppError from "../../../../app/AppError"
 import { EntityConfigEntry } from "../EntityRegistry"
 import { isEntityInstance } from "../SchemaService"
-import { AggregationTask, FilterCriteria, GroupAggregation, isMatchOperator, MatchAggregation, MatchObjectInfer, MatchOperatorArgument } from "./Daos"
+import { AggregationTask, FilterCriteria, GroupAggregation, isMatchOperator, MatchAggregation, MatchOperatorArgument } from "./Daos"
 
 export const filter = (findBy: FilterCriteria|undefined, config: EntityConfigEntry): Filter<Document> => {
     const $match: Filter<Document> = {}
@@ -15,16 +15,18 @@ export const filter = (findBy: FilterCriteria|undefined, config: EntityConfigEnt
         findBy.forEach((arg) => parseArrFilter($match, arg))
         return $match
     }
+    if (isEntityInstance(findBy)) {
+        findBy = {_id: findBy._id}
+    }
 
-    if (typeof findBy === 'object' && !Array.isArray(findBy) && !(findBy instanceof ObjectId) && !isEntityInstance(findBy)) {
+    if (typeof findBy === 'object' && !Array.isArray(findBy) && !(findBy instanceof ObjectId)) {
         Object.entries(findBy)
             .forEach(([field, args]) => createCondition($match, field, args))
 
         return $match
     }
 
-    const field = config.strategy.primaryKey || 'id'
-    createCondition($match, field, findBy)
+    createCondition($match, config.primaryKey, findBy)
 
     return $match
 }

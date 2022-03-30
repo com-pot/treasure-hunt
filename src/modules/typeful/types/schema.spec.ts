@@ -23,7 +23,7 @@ describe('types/list', function() {
         ])
     })
 
-    const nestedConfig = {
+    const nestedConfig: SchemaSpec = {
         type: 'schema',
         fields: {
             stats: {

@@ -1,5 +1,5 @@
 import AppError from "../../../app/AppError";
-import { EntityModelSchema, FieldModel } from "../typeful";
+import { SchemaField } from "../typeSystem";
 import TypeRegistry from "./TypeRegistry";
 
 export type IntegrityContext = {
@@ -7,7 +7,7 @@ export type IntegrityContext = {
     typeRegistry: TypeRegistry,
 }
 export type ValidationScope = object
-type SanitizeOptions = object
+export type SanitizeOptions = Record<string, unknown>
 
 export default class IntegrityService {
     private readonly _integrityContext: IntegrityContext
@@ -19,7 +19,7 @@ export default class IntegrityService {
         }
     }
 
-    validate<T>(spec: FieldModel, subject: T, scope?: ValidationScope): boolean {
+    validate<T>(spec: SchemaField, subject: T, scope?: ValidationScope): boolean {
         const type = this.typeRegistry.get(spec.type)
         if (!type) {
             console.error("Unknown type on", spec);
@@ -34,15 +34,15 @@ export default class IntegrityService {
         return type.validate(subject, spec, this._integrityContext, scope)
     }
 
-    sanitize<T>(spec: EntityModelSchema, subject: T, options: SanitizeOptions = {}): T {
+    sanitize<T>(spec: SchemaField, subject: T, options: SanitizeOptions = {}): T {
         const type = this.typeRegistry.get(spec.type)
 
         if (!type) {
-            throw Object.assign(new Error('misconfigured-spec.unknown-type'), {status: 501, details: {spec}})
+            throw new AppError('misconfigured-spec.unknown-type', 501, {spec})
         }
 
         if (!type.sanitize) {
-            throw Object.assign(new Error('not-implemented-sanitize'), {status: 501, details: {type: spec.type}})
+            throw new AppError('not-implemented-sanitize', 501, {type: spec.type})
         }
 
         return type.sanitize(subject, spec, this._integrityContext, options)

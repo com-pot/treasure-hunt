@@ -12,11 +12,11 @@ describe('mongAggregators', function() {
             ],
 
             [
-                ['age', 'eq', 69],
+                [['age', 'eq', 69]],
                 {age: {$eq: 69}},
             ],
             [
-                ['!age', 'eq', 69],
+                [['!age', 'eq', 69]],
                 {age: {$ne: 69}},
             ],
             [
@@ -29,19 +29,19 @@ describe('mongAggregators', function() {
             ],
 
             [
-                ['age', 'in', [37, 42]],
+                [['age', 'in', [37, 42]]],
                 {age: {$in: [37, 42]}},
             ],
             [
-                ['!age', 'in', [37, 42]],
+                [['!age', 'in', [37, 42]]],
                 {age: {$nin: [37, 42]}},
             ],
             [
-                ['age', 'nin', [66, 13]],
+                [['age', 'nin', [66, 13]]],
                 {age: {$nin: [66, 13]}},
             ],
             [
-                ['!age', 'nin', [66, 13]],
+                [['!age', 'nin', [66, 13]]],
                 {age: {$in: [66, 13]}},
             ],
 

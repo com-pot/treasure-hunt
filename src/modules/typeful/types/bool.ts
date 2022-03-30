@@ -1,6 +1,6 @@
-import { TypefulType } from "../typeful"
+import { defineTypefulType } from "../typeful"
 
-const t: TypefulType = {
+export default defineTypefulType({
     validate(value) {
         return typeof value === "boolean"
     },
@@ -20,6 +20,4 @@ const t: TypefulType = {
 
         return null
     },
-}
-
-export default t
+})

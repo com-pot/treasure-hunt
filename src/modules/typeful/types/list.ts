@@ -1,6 +1,6 @@
-import { TypefulType } from "../typeful"
+import { defineTypefulType } from "../typeful"
 
-const t: TypefulType = {
+export default defineTypefulType({
     validate(value) {
         return Array.isArray(value)
     },
@@ -10,5 +10,4 @@ const t: TypefulType = {
         }
         return value
     },
-}
-export default t
+})
