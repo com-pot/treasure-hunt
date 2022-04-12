@@ -18,8 +18,9 @@ export default (): Middleware => {
                 ctx.body = {error: 'unhandled-error'}
             }
 
-
-            ctx.app.emit('error', err, ctx); // todo: handle error?
+            if (ctx.status >= 500) {
+                ctx.app.emit('error', err, ctx); // todo: handle error?
+            }
         }
     }
 }
