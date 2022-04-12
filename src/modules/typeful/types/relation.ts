@@ -1,13 +1,10 @@
-import { TypefulType } from "../typeful";
+import { defineTypefulType } from "../typeful";
 
-const t: TypefulType = {
+export default defineTypefulType({
     validate() {
         return true
     },
     sanitize() {
         console.warn("relation sanitize not implemented");
     },
-}
-
-
-export default t
+})

@@ -1,58 +1,67 @@
-import { FieldModel, TypefulType } from "../typeful"
+import { defineTypefulType } from "../typeful"
+import { SchemaField } from "../typeSystem"
 
-export type SchemaSpec = FieldModel & {
-    fields: Record<string, FieldModel>,
+export type SchemaSpec = SchemaField & {
+    type: 'schema',
+    fields: Record<string, SchemaField>,
+}
+type SchemaValue = Record<string, unknown>
+
+export const isSchemaSpec = (subj: SchemaField): subj is SchemaSpec => {
+    return subj.type === 'schema' && 'fields' in subj
 }
 
-const typeObj: TypefulType<SchemaSpec> = {
-    validate(value, options, ctx, scope) {
-        if (!scope) {
-            scope = {}
-        }
+export default defineTypefulType<SchemaSpec>({
+    validate(value, options, scope, ctx) {
         if (!value || typeof value !== "object" || Array.isArray(value)) {
+            scope?.pushError('invalid-type')
             return false
         }
 
         const obj = value as object
 
-        const errors = []
+        let allOk = true
+        let shallowValidation = false
+
         for (const name in options.fields) {
+            const fieldScope = scope?.withPath(name)
             const field = options.fields[name]
+
 
             if (!(name in obj)) {
                 if (!field.required) {
                     continue
                 }
-                errors.push(name)
+                allOk = false
+                fieldScope?.pushError('required')
                 continue
             }
 
-            let validateField: (value: unknown, spec: FieldModel) => boolean = () => true
             if (ctx && ctx.integrity) {
-                validateField = (fieldValue, field) => {
-                    return ctx.integrity.validate(field, fieldValue) === true
-                }
-            }
-
-            if (!validateField(obj[name as keyof typeof obj], field)) {
-                errors.push(name)
+                const fieldValue = obj[name as keyof typeof obj]
+                allOk = allOk && ctx.integrity.validate(field, fieldValue, fieldScope) === true
+            } else {
+                shallowValidation = true
             }
         }
+        if (shallowValidation) {
+            console.warn("No integrity given on schema.validate(..., ..., ctx) - shallow validation applied");
+        }
 
-        return !errors.length
+        return allOk
     },
-    sanitize(value, options, ctx, sanitizeOptions: Record<string, unknown>) {
+    sanitize(value, options, sanitizeOptions, ctx) {
         if (!value || typeof value !== "object") {
             return
         }
 
-        const obj = value as object
+        const obj = value as SchemaValue
 
         Object.keys(obj).forEach((name) => {
             if (!options.fields[name]) {
                 const allowlist = sanitizeOptions?.allowlist
                 if (!allowlist || !Array.isArray(allowlist) || !allowlist.includes(name)) {
-                    delete obj[name as keyof typeof value]
+                    delete obj[name as keyof typeof obj]
                 }
             }
         })
@@ -63,7 +72,7 @@ const typeObj: TypefulType<SchemaSpec> = {
                 obj[key] = field.defaultValue as never
             }
 
-            if (ctx) {
+            if (ctx && 'fields' in field) {
                 const sanitized = obj[key] === undefined ? undefined : ctx.integrity.sanitize(field, obj[key], options)
                 if (sanitized !== undefined) {
                     obj[key] = sanitized
@@ -73,6 +82,4 @@ const typeObj: TypefulType<SchemaSpec> = {
 
         return obj
     },
-}
-
-export default typeObj
+})

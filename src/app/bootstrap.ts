@@ -15,23 +15,29 @@ export const getModules = async (dir: string): Promise<Record<string, AppModule>
         const moduleDir = path.dirname(file)
         const name = path.parse(file).base.replace(/\.appModule\.(js|ts)$/, '')
 
-        const module = {...await import(file) as TypefulModule}
+        const module = await importTypefulModule(file)
 
         module.entities = await initializeEntities(dir, moduleDir, module.entities)
 
-        if (module.entities) {
-            Object.entries(module.entities).forEach(([eName, config]) => {
-                if (!config.model) {
-                    console.warn("Entity " + eName + " does not have model specified");
-                }
-            })
-        }
+        module.entities && Object.entries(module.entities).forEach(([eName, config]) => {
+            if (!config.schema) {
+                console.warn("Entity " + eName + " does not have model specified");
+            }
+        })
 
 
         return [name, module]
     }))
 
     return Object.fromEntries(modules)
+}
+async function importTypefulModule(file: string): Promise<TypefulModule> {
+    let module = await import(file)
+    if (module.default && Object.keys(module).length === 1) {
+        module = module.default
+    }
+
+    return {...module} as TypefulModule
 }
 
 const initializeEntities = async (cwd: string, moduleDir: string, entities?: Record<string, Partial<EntityConfig>>): Promise<Record<string, EntityConfig>> => {
@@ -52,7 +58,7 @@ const initializeEntities = async (cwd: string, moduleDir: string, entities?: Rec
         }
 
         const entityName = match[2]
-        const type = match[4] || 'model'
+        const type = match[4] || 'schema'
 
         if (!entities[entityName]) {
             entities[entityName] = {}
@@ -75,8 +81,8 @@ const initializeEntities = async (cwd: string, moduleDir: string, entities?: Rec
             }
 
             const moduleContent = module.default ?? module
-            if (type === 'model') {
-                entity.model = moduleContent
+            if (type === 'schema') {
+                entity.schema = moduleContent
             } else {
                 entity._plugins[type] = moduleContent
             }
@@ -87,7 +93,7 @@ const initializeEntities = async (cwd: string, moduleDir: string, entities?: Rec
 
     const validEntityEntries = Object.entries(entities)
         .filter(([name, config]) => {
-            if (!config.model) {
+            if (!config.schema) {
                 console.warn(`Entity '${name}' did not load properly, ignoring`);
                 return false
             }

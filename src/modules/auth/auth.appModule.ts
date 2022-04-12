@@ -4,8 +4,9 @@ import ensureJsonRequest from "../../app/middleware/ensureJsonRequest"
 import AuthController from "./controllers/AuthController"
 
 import JwtService from "./servies/JwtService"
+import { EntitySpec } from "../typeful/typeful.js"
 
-export const entities = {
+export const entities: Record<string, EntitySpec> = {
     user: {
         publish: false,
     },
@@ -45,7 +46,7 @@ export const startUp = async (serviceContainer: ServiceContainer) => {
     router.put('/user/:login/password', async (ctx) => {
         ctx.body = await ctrl.updatePassword(ctx.actionContext, ctx.request.body.password, ctx.params.login)
     })
-    
+
     return {
         router,
     }

@@ -1,9 +1,8 @@
-import { ObjectId } from "mongodb"
 import { ActionContext } from "../../../../app/middleware/actionContext"
 import { EntityInstance, EntityRef } from "../../typeful"
 
 export type ArgumentValue = number | string | boolean | string[] | number[] | EntityRef | EntityRef[] | EntityInstance
-export type MatchObjectInfer = Record<string, ArgumentValue>
+export type MatchObjectInfer = Record<string, ArgumentValue|Record<string, ArgumentValue>|Record<string, ArgumentValue>[]>
 /** [field, operator] | [field, operator, argument] */
 export type MatchOperatorArgument = [string, string] | [string, string, ArgumentValue]
 
@@ -41,13 +40,9 @@ export type AggregationTask = MatchAggregation | GroupAggregation
 export type CreateRequest<T> = Partial<T>
 
 
-export interface DaoStrategy {
-    type: string,
-    primaryKey?: string,
-}
-
 export type ListResult<T> = {
     page: number,
+    perPage: number,
     total: number,
     items: T[],
 }

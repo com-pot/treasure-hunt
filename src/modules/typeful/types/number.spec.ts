@@ -33,4 +33,9 @@ describe('types/number', function() {
         typeSpec.validateType(number, intConfig, validValues, invalidValues)
         typeSpec.sanitizeValues(number, intConfig, sanitizeCases)
     })
+
+    const minValueConfig = {type: 'number', minValue: 4.20}
+    describe('with config' + typeSpec.stringify(minValueConfig), function() {
+        typeSpec.validateType(number, minValueConfig, [4.20, 10, Number.MAX_SAFE_INTEGER], [4.19, 0, -4.20])
+    })
 })

@@ -1,6 +1,6 @@
-import { TypefulType } from "../typeful"
+import { defineTypefulType } from "../typeful"
 
-const t: TypefulType = {
+export default defineTypefulType({
     validate() {
         console.warn("Validate for type date is not implemented");
         return true
@@ -21,6 +21,4 @@ const t: TypefulType = {
             return date
         }
     },
-}
-
-export default t
+})

@@ -1,5 +1,5 @@
 import AppError from "../../../app/AppError";
-import { Dao, DaoStrategy } from "./dao/Daos"
+import { Dao } from "./dao/Daos"
 import { EntityConfigEntry } from "./EntityRegistry";
 
 export type DaoCreateFn = (config: EntityConfigEntry) => Partial<Dao>
@@ -17,28 +17,29 @@ export default class DaoFactory {
         return this
     }
 
-    strategyFulfillable(strategy: DaoStrategy): boolean {
-        return strategy.type in this.daoCreateFns
+    strategyFulfillable(persistenceStrategy: string): boolean {
+        return persistenceStrategy in this.daoCreateFns
     }
 
     createDao(config: EntityConfigEntry): Dao {
-        const createFn = this.daoCreateFns[config.strategy.type]
+        const createFn = this.daoCreateFns[config.persistence]
         if (!createFn) {
-            throw new Error(`Dao type '${config.strategy.type}' not available`)
+            throw new Error(`Dao type '${config.persistence}' not available`)
         }
 
-        const daoProxy = new Proxy(this.daoCreateFns[config.strategy.type](config), {
+        const daoProxy = new Proxy(this.daoCreateFns[config.persistence](config), {
             get(t, p) {
-                const prop = p as keyof Dao
-                if (!t[prop]) {
-                    return () => Promise.reject(new AppError('not-implemented', 501, {
-                        subject: 'dao',
-                        key: config.meta.entityFqn,
-                        member: prop,
-                    }))
+                if (!(p in t)) {
+                    return function unsupportedDaoOperation() {
+                        return Promise.reject(new AppError('not-implemented', 501, {
+                            subject: 'dao',
+                            key: config.meta.entityFqn,
+                            member: p,
+                        }))
+                    }
                 }
 
-                return t[prop]
+                return t[p as keyof Dao]
             }
         })
 

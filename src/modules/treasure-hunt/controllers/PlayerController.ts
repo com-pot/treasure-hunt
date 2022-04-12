@@ -90,10 +90,10 @@ export default class PlayerController {
         const storyPartsCollection = this.tfa.getDao<StoryPartEntity>('treasure-hunt.story-part')
         const storyPart = await storyPartsCollection.findOne(action, {slug: partId})
         if (!storyPart) {
-            throw Object.assign(new Error('not-found'), {details: {target: 'story-part'}})
+            throw new AppError('not-found', 404, {target: 'story-part'})
         }
         if (!storyPart.challenge) {
-            throw Object.assign(new Error('no-challenge'), {status: 403})
+            throw new AppError('no-challenge', 403)
         }
 
         const progressionCollection = this.tfa.getDao<PlayerProgressionEntity>('treasure-hunt.player-progression')

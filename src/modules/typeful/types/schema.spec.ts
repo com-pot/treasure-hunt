@@ -1,7 +1,7 @@
 import typeSpec from "../test/typeSpec"
 import schema, { SchemaSpec } from "./schema"
 
-describe('types/list', function() {
+describe('types/schema', function() {
     const schemaConfig: SchemaSpec = {
         type: 'schema',
         fields: {
@@ -23,7 +23,7 @@ describe('types/list', function() {
         ])
     })
 
-    const nestedConfig = {
+    const nestedConfig: SchemaSpec = {
         type: 'schema',
         fields: {
             stats: {

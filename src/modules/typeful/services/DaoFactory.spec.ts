@@ -23,13 +23,13 @@ describe('DaoFactory', function() {
     it('should create registered type dao', function() {
         const dao = daoFactory.createDao({
             ...dummyItemModelEntry,
-            strategy: {type: 'dummy', primaryKey: 'id'},
+            persistence: 'dummy',
         }) as unknown as DummyDao
 
         expect((dao).config.meta.entityFqn).to.equal('dummy.item')
     })
 
     it('should throw unregistered type dao', function() {
-        expect(() => daoFactory.createDao({...dummyItemModelEntry, strategy: {type: 'random', primaryKey: 'id'}})).to.throw(Error)
+        expect(() => daoFactory.createDao({...dummyItemModelEntry, persistence: 'random'})).to.throw(Error)
     })
 })

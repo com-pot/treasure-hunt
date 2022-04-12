@@ -1,7 +1,8 @@
-import { EntityConfig, PersistenceStrategy, TypefulModule } from "../typeful"
+import { createEntityEndpoints, EntityEndpoints } from "../model/schema"
+import { EntityConfig, TypefulModule } from "../typeful"
 
 
-export type EntityConfigEntry = EntityConfig & {
+export type EntityConfigEntry = Omit<EntityConfig, 'plural'> & {
     meta: {
         module: string,
         name: string,
@@ -9,19 +10,12 @@ export type EntityConfigEntry = EntityConfig & {
         entityFqn: string,
         collectionFqn: string,
     }
-    strategy: NonNullable<EntityConfig['strategy']>
-}
+    persistence: NonNullable<EntityConfig['persistence']>
 
-const initStrategy = (strategy?: Partial<PersistenceStrategy>): PersistenceStrategy => {
-    strategy = Object.assign({}, strategy)
-    if (!strategy.type) {
-        strategy.type = 'mongo'
-    }
-    if (!strategy.primaryKey) {
-        strategy.primaryKey = 'id'
-    }
+    primaryKey: string,
+    endpoints: EntityEndpoints,
 
-    return strategy as PersistenceStrategy
+    stringify?: string | {template: string},
 }
 
 export default class EntityRegistry {
@@ -35,32 +29,38 @@ export default class EntityRegistry {
     }
 
     registerModule(moduleName: string, module: TypefulModule): this {
-        module.entities && Object.entries(module.entities).forEach(([entityName, entity]) => {
-            const collectionName = entity.plural || entityName + 's'
-
-            const entry: EntityConfigEntry = {
-                ...entity,
-                meta: {
-                    module: moduleName,
-                    name: entityName,
-                    collectionName,
-
-                    entityFqn: `${moduleName}.${entityName}`,
-                    collectionFqn: `${moduleName}.${collectionName}`,
-                },
-                strategy: initStrategy(entity.strategy),
-            }
-
-            if (entry.meta.entityFqn === entry.meta.collectionName) {
-                console.warn("Collection and entity resulted in same name: " + entry.meta.entityFqn + ". Ignoring");
-                return
-            }
-
-            this.entities.push(entry)
-            this.entitiesIndex[entry.meta.entityFqn] = entry
-        })
+        module.entities && Object.entries(module.entities)
+            .forEach(([entityName, entity]) => this.registerEntity(moduleName, entityName, entity))
 
         return this
+    }
+
+    private registerEntity(moduleName: string, entityName: string, entity: EntityConfig): void {
+        const collectionName = entity.plural || entityName + 's'
+
+        const meta: EntityConfigEntry['meta'] = {
+            module: moduleName,
+            name: entityName,
+            collectionName,
+
+            entityFqn: `${moduleName}.${entityName}`,
+            collectionFqn: `${moduleName}.${collectionName}`,
+        }
+        const entry: EntityConfigEntry = {
+            ...{...entity, plural: undefined},
+            meta,
+            persistence: entity.persistence || 'mongo',
+            endpoints: createEntityEndpoints(meta),
+            primaryKey: entity.primaryKey || 'id',
+        }
+
+        if (entry.meta.entityFqn === entry.meta.collectionName) {
+            console.warn("Collection and entity resulted in same name: " + entry.meta.entityFqn + ". Ignoring");
+            return
+        }
+
+        this.entities.push(entry)
+        this.entitiesIndex[entry.meta.entityFqn] = entry
     }
 
     get(name: string): EntityConfigEntry {

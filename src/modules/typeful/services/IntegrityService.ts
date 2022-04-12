@@ -1,13 +1,18 @@
 import AppError from "../../../app/AppError";
-import { EntityModelSchema, FieldModel } from "../typeful";
+import { SchemaField } from "../typeSystem";
 import TypeRegistry from "./TypeRegistry";
 
 export type IntegrityContext = {
     integrity: IntegrityService,
     typeRegistry: TypeRegistry,
 }
-export type ValidationScope = object
-type SanitizeOptions = object
+export type ValidationError = {path: string, error: string, args?: any[]}
+export type ValidationScope = {
+    _path: string, errors: ValidationError[],
+    withPath: (path: string) => ValidationScope,
+    pushError: (error: string, args?: ValidationError['args']) => void,
+}
+export type SanitizeOptions = Record<string, unknown>
 
 export default class IntegrityService {
     private readonly _integrityContext: IntegrityContext
@@ -19,11 +24,16 @@ export default class IntegrityService {
         }
     }
 
-    validate<T>(spec: FieldModel, subject: T, scope?: ValidationScope): boolean {
+    validate<T>(spec: SchemaField, subject: T, scope?: ValidationScope): boolean {
         const type = this.typeRegistry.get(spec.type)
         if (!type) {
             console.error("Unknown type on", spec);
             throw new AppError('typeful.unknown-type', 501, {specType: spec.type})
+        }
+
+        if (spec.enum && spec.enum.includes(subject)) {
+            scope?.pushError('non-enum-value')
+            return false
         }
 
         if (!type.validate) {
@@ -31,20 +41,40 @@ export default class IntegrityService {
             return true
         }
 
-        return type.validate(subject, spec, this._integrityContext, scope)
+        return type.validate(subject, spec, scope, this._integrityContext)
     }
 
-    sanitize<T>(spec: EntityModelSchema, subject: T, options: SanitizeOptions = {}): T {
+    sanitize<T>(spec: SchemaField, subject: T, options: SanitizeOptions = {}): T {
         const type = this.typeRegistry.get(spec.type)
 
         if (!type) {
-            throw Object.assign(new Error('misconfigured-spec.unknown-type'), {status: 501, details: {spec}})
+            throw new AppError('misconfigured-spec.unknown-type', 501, {spec})
         }
 
         if (!type.sanitize) {
-            throw Object.assign(new Error('not-implemented-sanitize'), {status: 501, details: {type: spec.type}})
+            throw new AppError('not-implemented-sanitize', 501, {type: spec.type})
         }
 
-        return type.sanitize(subject, spec, this._integrityContext, options)
+        return type.sanitize(subject, spec, options, this._integrityContext)
     }
 }
+
+export const createValidationScope = (): ValidationScope => ({
+    _path: '',
+    errors: [],
+
+    withPath(path) {
+        const childScope: Partial<ValidationScope> = {
+            _path: `${this._path ? this._path + '.' : ''}${path}`,
+            errors: this.errors,
+        }
+
+        childScope.withPath = this.withPath.bind(childScope)
+        childScope.pushError = this.pushError.bind(childScope)
+
+        return childScope as ValidationScope
+    },
+    pushError(error, args) {
+        this.errors.push({path: this._path, error, args})
+    },
+})

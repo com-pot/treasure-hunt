@@ -1,11 +1,11 @@
-import { merge } from "lodash"
+import { get, merge } from "lodash"
 import { MongoClient } from "mongodb"
 import AppError from "../../../../app/AppError"
 
 import { ActionContext } from "../../../../app/middleware/actionContext"
-import { EntityInstance } from "../../typeful"
+import { EntityInstance, UniqueConstraint } from "../../typeful"
 import { EntityConfigEntry } from "../EntityRegistry"
-import IntegrityService from "../IntegrityService"
+import IntegrityService, { createValidationScope } from "../IntegrityService"
 import { AggregationTask, CreateRequest, Dao, FilterCriteria, ListResult, PaginationParam, SortOrder } from "./Daos"
 import mongoAggregators from "./mongoAggregators"
 
@@ -42,7 +42,7 @@ export default class MongoDao<T extends EntityInstance> implements Dao<T> {
         const total = await this.collection.countDocuments(query)
 
         return {
-            page,
+            page, perPage,
             total,
             items,
         }
@@ -56,13 +56,20 @@ export default class MongoDao<T extends EntityInstance> implements Dao<T> {
     }
 
     async create(action: ActionContext, data: CreateRequest<T>) {
-        const validationScope = {errors: []}
-        if (!this.integrityService.validate(this.config.model, data, validationScope)) {
-            throw new AppError('invalid-data', 400, {details: {errors: validationScope.errors}})
+        const validationScope = createValidationScope()
+        if (!this.integrityService.validate(this.config.schema, data, validationScope)) {
+            throw new AppError('invalid-data', 400, {errors: validationScope.errors})
         }
 
 
-        const sanitized = this.integrityService.sanitize(this.config.model, data) as T
+        const sanitized = this.integrityService.sanitize(this.config.schema, data) as T
+
+        const unmetUniquenessConstraints = await this.checkUnique(sanitized)
+        if (unmetUniquenessConstraints && unmetUniquenessConstraints.length > 0) {
+            throw new AppError('unique-constraint-violation', 409, {
+                constraints: unmetUniquenessConstraints,
+            })
+        }
 
         sanitized.stats = {
             creator: action.actor,
@@ -98,7 +105,7 @@ export default class MongoDao<T extends EntityInstance> implements Dao<T> {
 
         const stats = item.stats
         merge(item, data)
-        this.integrityService.sanitize(this.config.model, item)
+        this.integrityService.sanitize(this.config.schema, item)
         item.stats = stats || {}
 
         if (!existingItem) {
@@ -140,8 +147,34 @@ export default class MongoDao<T extends EntityInstance> implements Dao<T> {
         return true
     }
 
+    private async checkUnique(checkItem: T): Promise<UniqueConstraintError[] | null> {
+        const unique = this.config.schema.unique
+
+        if (!unique) {
+            return null
+        }
+
+        const checks: (UniqueConstraintError|null)[] = await Promise.all(unique.map(async (constraint) => {
+            const filter = mongoAggregators.filter({[constraint]: get(checkItem, constraint)}, this.config)
+            console.log({constraint, filter});
+
+
+            const existingItem = await this.collection.findOne(filter)
+            if (existingItem) {
+                return {constraint}
+            }
+
+            return null
+        }))
+
+        return checks.filter((check) => !!(check)) as UniqueConstraintError[]
+    }
+
     private get collection() {
         return this.mongoClient.db().collection(this.config.meta.entityFqn)
     }
 }
 
+type UniqueConstraintError = {
+    constraint: UniqueConstraint,
+}
