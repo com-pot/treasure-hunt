@@ -5,6 +5,7 @@ import ModelService from "../../typeful/services/ModelService"
 import { PlayerEntity } from "./player"
 import { ObjectId } from "mongodb"
 import { EntityInstance } from "../../typeful/typeful"
+import { ClueEntity } from "./clue"
 
 type WithCurrentChallenge = {currentChallenge: number}
 type WithTrophy = {trophy: EntityInstance|null}
@@ -13,14 +14,14 @@ export const create = (tfa: TypefulAccessor, model: string) => {
     return {
         ...ModelService.create<PlayerEntity>(tfa, model),
 
-        async createPlayer(action: ActionContext, login: string, story: string) {
-            let player = await this.dao.findOne(action, {login, story})
+        async createPlayer(action: ActionContext, user: string, story: string) {
+            let player = await this.dao.findOne(action, {user, story})
             if (player) {
                 throw new AppError('player-already-exists', 409)
             }
 
             player = await this.dao.create(action, {
-                user: login, story,
+                user, story,
             })
 
             return player
@@ -59,6 +60,19 @@ export const create = (tfa: TypefulAccessor, model: string) => {
                 const trophy = trophyiesByPlayer[p._id.toString()] ?? null
                 return {...p, trophy}
             })
+        },
+
+        async collectItem(action: ActionContext, player: PlayerEntity, itemName: string): Promise<void> {
+            if (!player.itemBag) {
+                player.itemBag = []
+            }
+            if (player.itemBag.includes(itemName)) {
+                return
+            }
+
+            player.itemBag.push(itemName)
+            await this.dao.update(action, player, player)
+
         }
     }
 }

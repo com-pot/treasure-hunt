@@ -2,28 +2,14 @@ import AppError from "../../../app/AppError"
 import { ActionContext } from "../../../app/middleware/actionContext"
 import TypefulAccessor from "../../typeful/services/TypefulAccessor"
 import { ChallengeEntity } from "../model/challenge"
+import { ClueService } from "../model/clue.service"
 import { PlayerEntity } from "../model/player"
 import { PlayerProgressionEntity } from "../model/player-progression"
 import { PlayerProgressionService } from "../model/player-progression.service"
 import { StoryPartEntity } from "../model/story-part"
-import { TrophyEntity } from "../model/trophy"
+import { AnswerAttempt, StoryPartService } from "../model/story-part.service"
+import { TreasureHuntContentService } from "../model/_content.service"
 
-type ProgressionData = {
-    title: string,
-    slug: string,
-    challenge: StoryPartEntity['challenge'],
-    status: string|undefined,
-}
-type OkResult = {
-    status: 'ok',
-    progression?: ProgressionData[],
-    trophy?: TrophyEntity,
-}
-type ErrResult = {
-    status: 'ko',
-    errorActions: ChallengeEntity['onError'],
-    timeout?: PlayerProgressionEntity['timeout'],
-}
 
 export default class PlayerController {
     constructor(private readonly tfa: TypefulAccessor) {
@@ -37,16 +23,20 @@ export default class PlayerController {
         const progression = await progressionModel.getProgression(actionContext, player)
 
         const storyPartIds = progression.map((p) => p.storyPart)
-        const storyParts = (await storyPartsCollection.list(actionContext, {_id: storyPartIds})).items
+        const storyParts = (await storyPartsCollection.list(actionContext, {_id: storyPartIds}, undefined, {page: 1, perPage: 1000})).items
 
         return storyParts.map((sp) => {
             const progressItem = progression.find((p) => sp._id.equals(p.storyPart))
 
             return {
+                _id: sp._id,
                 title: sp.title,
                 slug: sp.slug,
                 challenge: sp.challenge,
-                status: progressItem && progressItem.status,
+
+                status: progressItem?.status,
+                progressData: progressItem?.data,
+                timeout: progressItem?.timeout,
             }
         })
     }
@@ -66,10 +56,17 @@ export default class PlayerController {
 
         let challenge: ChallengeEntity|null = null
         if (storyPart.challenge) {
-            challenge = {...await this.tfa.getDao<ChallengeEntity>('treasure-hunt.challenge').findOne(action, storyPart.challenge)}
+            challenge = await this.tfa.getDao<ChallengeEntity>('treasure-hunt.challenge').findOne(action, storyPart.challenge)
+            if (challenge) {
+                challenge = {...challenge}
+                delete challenge.checkSum
+                delete challenge.onError
+            }
+        }
 
-            delete challenge.checkSum
-            delete challenge.onError
+        if (storyPart.thContentBlocks) {
+            const contentService = this.tfa.getModel<TreasureHuntContentService>('treasure-hunt._content')
+            storyPart.thContentBlocks = await contentService.filterVisibleBlocks({...action, player}, storyPart.thContentBlocks || [])
         }
 
         const trophies = this.tfa.getDao('treasure-hunt.trophy')
@@ -85,87 +82,31 @@ export default class PlayerController {
         }
     }
 
-    // OMG, spaghetti
-    async checkChallengeAnswer(action: ActionContext, player: PlayerEntity, partId: string, answer: {checkSum: string}) {
-        const storyPartsCollection = this.tfa.getDao<StoryPartEntity>('treasure-hunt.story-part')
-        const storyPart = await storyPartsCollection.findOne(action, {slug: partId})
+    async checkChallengeAnswer(action: ActionContext, player: PlayerEntity, partId: string, answer: AnswerAttempt) {
+        const storyPartsService = this.tfa.getModel<StoryPartService>('treasure-hunt.story-part')
+
+        const storyPart = await storyPartsService.dao.findOne(action, {slug: partId})
         if (!storyPart) {
-            throw new AppError('not-found', 404, {target: 'story-part'})
-        }
-        if (!storyPart.challenge) {
-            throw new AppError('no-challenge', 403)
+            throw new AppError('not-found', 404, {target: 'story-part', reason: 'query'})
         }
 
-        const progressionCollection = this.tfa.getDao<PlayerProgressionEntity>('treasure-hunt.player-progression')
-        const progressionQuery = {player: player._id, storyPart: storyPart._id}
-        const progression = await progressionCollection.findOne(action, progressionQuery)
-        if (!progression) {
-            throw Object.assign(new Error('not-found'), {details: {target: 'player-progression'}})
-        }
-        const timeout = progression.timeout
-        if (timeout && timeout.until > action.moment) {
-            return { status: 'timeout', timeout }
-        }
+        const checkResult = await storyPartsService.checkAnswer(action, player, storyPart, answer)
 
-        const challenge = await this.tfa.getDao<ChallengeEntity>('treasure-hunt.challenge').findOne(action, storyPart.challenge)
-        if (!challenge || !challenge.checkSum) {
-            throw Object.assign(new Error('no-check-available'), {status: 409})
-        }
+        const resultWithProgression: typeof checkResult & {progression?: any[]} = checkResult
+        resultWithProgression.progression = await this.getProgressionData(action, player)
 
-        if (answer.checkSum !== challenge.checkSum) {
-            const errResult: ErrResult = {
-                status: 'ko',
-                errorActions: challenge.onError,
-            }
+        return resultWithProgression
+    }
 
-            const timeoutAction = challenge.onError?.find((errAction) => errAction[0] === 'timeout')
-            if (timeoutAction) {
-                const until = new Date(action.moment)
-                const durationSeconds = timeoutAction[1] as number
-                until.setSeconds(until.getSeconds() + durationSeconds)
-                const timeout = { since: action.moment, until }
-                await progressionCollection.update(action, progressionQuery, {timeout})
-                errResult.timeout = timeout
-            }
+    async revealClue(action: ActionContext, player: PlayerEntity, clueKey: string) {
+        const clueService = this.tfa.getModel<ClueService>('treasure-hunt.clue')
 
-            return errResult
+        const clue = await clueService.dao.findOne(action, clueKey)
+        if (!clue) {
+            throw new AppError('not-found', 404, {clue: clueKey})
         }
 
-        if (progression.status === 'done') {
-            throw Object.assign(new Error('already-solved'), {status: 409})
-        }
-
-        await progressionCollection.update(action, progressionQuery, {status: 'done'})
-
-        const checkResult: OkResult = {
-            status: 'ok',
-        }
-
-        const order = storyPart.order + 1
-        const nextStoryPart = await storyPartsCollection.findOne(action, {story: player.story, order})
-        if (nextStoryPart) {
-            await progressionCollection.create(action, {
-                player: player._id,
-                storyPart: nextStoryPart._id,
-                status: 'new',
-                data: null,
-            })
-            checkResult.progression = await this.getProgressionData(action, player)
-
-            const count = await storyPartsCollection.count(action, {story: player.story})
-            if (order === count) {
-                const trophies = this.tfa.getDao<TrophyEntity>('treasure-hunt.trophy')
-
-                const trophy = await trophies.create(action, {
-                    player: player._id,
-                    story: player.story,
-                    order: await trophies.count(action, {story: player.story}) + 1
-                })
-
-                checkResult.trophy = trophy
-            }
-        }
-
-        return checkResult
+        const revealedClue = await clueService.revealClue(action, clue)
+        return clueService.preparePlayerClue(action, player, revealedClue)
     }
 }

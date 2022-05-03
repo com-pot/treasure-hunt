@@ -1,5 +1,4 @@
 import { EntityConfigEntry } from "../services/EntityRegistry"
-import { SchemaSpec } from "../types/schema"
 
 export default {
     type: 'schema',

@@ -7,10 +7,14 @@ export default {
     fields: {
         user: {type: 'relation', target: 'auth.user'},
         story: {type: 'relation', target: 'treasure-hunt.story'},
+
+        itemBag: {type: 'list', innerType: 'string'},
     },
 }
 
 export type PlayerEntity = EntityInstance & {
     user: EntityRef<UserEntity>,
     story: EntityRef<StoryEntity>,
+
+    itemBag?: string[],
 }

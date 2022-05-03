@@ -18,6 +18,6 @@ export type PlayerProgressionEntity = EntityInstance & {
     player: EntityRef<PlayerEntity>,
     storyPart: EntityRef<StoryPartEntity>,
     status: string,
-    data: object|null,
+    data: Record<string, any>|null,
     timeout: PlayerTimeoutStruct,
 }

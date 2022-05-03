@@ -10,7 +10,7 @@ export default {
             },
             checkSum: '3',
             onError: [
-                ['message', "Ale né musíme to zkusit znova!"],
+                {type: 'message', arguments: {text: 'Ale né musíme to zkusit znova!'}},
             ],
         },
         {
@@ -21,8 +21,8 @@ export default {
             challengeConfig: {prompt: "Jak se jen jmenuje??"},
             checkSum: '3b56a399',
             onError: [
-                ['message', "Ne ne! To není ono musíš si vzpomenout, jak se jmenovala !"],
-                ['gameState', "reset"],
+                {type: 'message', arguments: {text: 'Ne ne! To není ono musíš si vzpomenout, jak se jmenovala !'}},
+                {type: 'gameState', arguments: {action: 'reset'}},
             ],
         },
         {
@@ -39,7 +39,7 @@ export default {
             },
             checkSum: '744b1831',
             onError: [
-                ['message', "Instinkt ti říká, že tohle není správně. Musíš se víc soustředit! Špatný poměr by Teda mohl zabít!"],
+                {type: 'message', arguments: {text: 'Instinkt ti říká, že tohle není správně. Musíš se víc soustředit! Špatný poměr by Teda mohl zabít!'}},
             ],
         },
         {
@@ -50,7 +50,7 @@ export default {
             challengeConfig: {inputText: 'byl naprdlo', outputLength: 'byl naprdlo '.length},
             checkSum: '481a3a09',
             onError: [
-                ['message', "Tohle nezní úplně správně možná to budu muset ještě trochu zpřeházet nebo změnit pořadí? Vzpomeň si na příběh - z kolika částí se skládá původní jméno"],
+                {type: 'message', arguments: {text: 'Tohle nezní úplně správně možná to budu muset ještě trochu zpřeházet nebo změnit pořadí? Vzpomeň si na příběh - z kolika částí se skládá původní jméno'}},
             ],
         },
         {
@@ -89,7 +89,7 @@ export default {
             },
             checkSum: '253cebd1',
             onError: [
-                ['message', "Musel jsem to poplést. Radši to překontroluji"],
+                {type: 'message', arguments: {text: 'Musel jsem to poplést. Radši to překontroluji'}},
             ],
         },
         {
@@ -116,8 +116,8 @@ export default {
             },
             checkSum: '711eab77',
             onError: [
-                ['message', "Na zem do písku před Teda kreslíš desku o 9 polích a zakresluješ do ní hvězdy, když v tom přiběhne pavouk, malbu smaže a zase uteče. Jak se zdá, pavoučí žena se ti snaží napovědět, že takhle to není správně a někde je chyba."],
-                ['gameState', 'reset'],
+                {type: 'message', arguments: {text: 'Na zem do písku před Teda kreslíš desku o 9 polích a zakresluješ do ní hvězdy, když v tom přiběhne pavouk, malbu smaže a zase uteče. Jak se zdá, pavoučí žena se ti snaží napovědět, že takhle to není správně a někde je chyba.'}},
+                {type: 'gameState', arguments: {action: 'reset'}},
             ],
         },
         {
@@ -128,7 +128,7 @@ export default {
             challengeConfig: async () => (await import('./challenge.sotw.shamans.js')).default,
             checkSum: '7630d587',
             onError: [
-                ['message', "Ne když je usadíme takhle, tak budou hádat, nebo by se mohli i urazit."],
+                {type: 'message', arguments: {text: 'Ne když je usadíme takhle, tak budou hádat, nebo by se mohli i urazit.'}},
             ],
         },
         {
@@ -139,7 +139,7 @@ export default {
             challengeConfig: async () => (await import('./challenge.sotw.totems.js')).default,
             checkSum: '5be7e1ec',
             onError: [
-                ['message', "Ne to není ono... stále necítíš spojení se světem živých"],
+                {type: 'message', arguments: {text: 'Ne to není ono... stále necítíš spojení se světem živých'}},
             ],
         },
         {
@@ -150,7 +150,7 @@ export default {
             challengeConfig: async () => (await import('./challenge.sotw.rings.js')).default,
             checkSum: '4fad461c',
             onError: [
-                ['message', "Stále všechny ozářené značky nesměrují směrem nahoru k totemu"],
+                {type: 'message', arguments: {text: 'Stále všechny ozářené značky nesměrují směrem nahoru k totemu'}},
             ],
         },
         {
@@ -160,12 +160,12 @@ export default {
             type: 'drums',
             checkSum: '581d381b',
             onError: [
-                ['message', "Ale ne! Popletly se ti bubny! Musíš to zkusit znovu!"],
+                {type: 'message', arguments: {text: 'Ale ne! Popletly se ti bubny! Musíš to zkusit znovu!'}},
             ],
         },
         {
             id: 'sotw.ch-11.final-choice',
-            
+
             name: "Správný dar",
             description: "Musíš použít správný dar od šamanů, ke spoutání zlého ducha. Dar od kterého šamana použiješ?",
             type: 'finalChoice',
@@ -174,8 +174,8 @@ export default {
             },
             checkSum: '1af84',
             onError: [
-                ['message', 'Nevybral jsi dobře ! Stvůře se navíc podařilo tě odtáhnout od oltáře. Musíš jí tedy dotáhnout zpět a to zabere dobrých 10 minut.'],
-                ['timeout', 10 * 60],
+                {type: 'message', arguments: {text: 'Nevybral jsi dobře ! Stvůře se navíc podařilo tě odtáhnout od oltáře. Musíš jí tedy dotáhnout zpět a to zabere dobrých 10 minut.'}},
+                {type: 'timeout', arguments: {duration: 10 * 60}},
             ],
         },
     ],

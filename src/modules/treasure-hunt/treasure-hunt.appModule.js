@@ -13,21 +13,35 @@ export const entities = {
     },
     'story-part': {
         primaryKey: 'slug',
+        stringify: {
+            template: '{{title}} [{{story}}#{{slug}}]'
+        },
     },
     'challenge-type': {
         primaryKey: 'type',
         persistence: 'static',
+
+        stringify: 'type',
     },
     challenge: {
         stringify: {
             template: '{{name}} [{{id}}]',
         }
     },
+
+    clue: {
+        primaryKey: 'slug',
+        stringify: {
+            template: '{{name}} [{{slug}}]',
+        },
+    }
 }
 
 const createPlayerRouter = (serviceContainer) => {
     const router = new Router()
-    router.use('/progression', requirePlayer(serviceContainer.typefulAccessor))
+    const ensurePlayer = requirePlayer(serviceContainer.typefulAccessor)
+    router.use('/progression', ensurePlayer)
+    router.use('/clue', ensurePlayer)
 
     const playerCtrl = new PlayerController(serviceContainer.typefulAccessor)
     router.get('/progression', async (ctx) => {
@@ -40,6 +54,10 @@ const createPlayerRouter = (serviceContainer) => {
 
     router.post('/progression/:slug/answer', async (ctx) => {
         ctx.body = await playerCtrl.checkChallengeAnswer(ctx.actionContext, ctx.player, ctx.params.slug, ctx.request.body)
+    })
+
+    router.post('/clue/:key', async (ctx) => {
+        ctx.body = await playerCtrl.revealClue(ctx.actionContext, ctx.player, ctx.params.key)
     })
 
     return router
@@ -88,5 +106,5 @@ export const startUp = async (serviceContainer) => {
 }
 
 export const plugins = {
-    executive: require('./treasure-hunt.executiveModule').default
+    executive: require('./executive/treasure-hunt.executiveModule').default,
 }

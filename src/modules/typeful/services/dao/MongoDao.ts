@@ -123,7 +123,9 @@ export default class MongoDao<T extends EntityInstance> implements Dao<T> {
             throw new Error('update-error.unacknowledged')
         }
 
-        return item
+        const updatedItem = await this.collection.findOne(query) as T
+
+        return updatedItem
     }
 
     async delete(action: ActionContext, filter: FilterCriteria) {
@@ -156,7 +158,6 @@ export default class MongoDao<T extends EntityInstance> implements Dao<T> {
 
         const checks: (UniqueConstraintError|null)[] = await Promise.all(unique.map(async (constraint) => {
             const filter = mongoAggregators.filter({[constraint]: get(checkItem, constraint)}, this.config)
-            console.log({constraint, filter});
 
 
             const existingItem = await this.collection.findOne(filter)

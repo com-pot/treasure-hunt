@@ -64,7 +64,7 @@ export const createApp = async () => {
     app.use(async (ctx, next) => {
         await next()
         if (ctx.status === 404 && (!ctx.body || ctx.body === "Not Found")) {
-            throw new AppError('not-found', 404, 'route-not-found')
+            throw new AppError('not-found', 404, {reason: 'route-not-found'})
         }
     })
 

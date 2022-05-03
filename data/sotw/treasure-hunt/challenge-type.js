@@ -81,5 +81,27 @@ export default {
             type: 'zebra',
             params: null, // this is one of the most complex-to-parametrize components
         },
+        {
+            type: 'choice.picture',
+            params: {
+                urlPrefis: {type: 'string'},
+                options: {type: 'list', innerType: {type: 'string'}},
+            },
+        },
+        {
+            type: "choice.value-label",
+            params: {
+                options: {
+                    type: 'list',
+                    innerType: {
+                        type: 'schema',
+                        fields: {
+                            value: {type: 'string'},
+                            label: {type: 'string'},
+                        },
+                    },
+                },
+            },
+        },
     ],
 }

@@ -1,7 +1,7 @@
 import { ActionContext } from "../../../../app/middleware/actionContext"
 import { EntityInstance, EntityRef } from "../../typeful"
 
-export type ArgumentValue = number | string | boolean | string[] | number[] | EntityRef | EntityRef[] | EntityInstance
+export type ArgumentValue = number | string | boolean | null | string[] | number[] | EntityRef | EntityRef[] | EntityInstance
 export type MatchObjectInfer = Record<string, ArgumentValue|Record<string, ArgumentValue>|Record<string, ArgumentValue>[]>
 /** [field, operator] | [field, operator, argument] */
 export type MatchOperatorArgument = [string, string] | [string, string, ArgumentValue]
@@ -52,7 +52,7 @@ export interface Dao<T extends EntityInstance = EntityInstance> {
     count(action: ActionContext, filter?: FilterCriteria): Promise<number>
     aggregate<TAggr=unknown>(action: ActionContext, aggregate: AggregationTask[]): Promise<TAggr[]>
 
-    findOne(action: ActionContext, filter?: FilterCriteria): Promise<T>
+    findOne(action: ActionContext, filter?: FilterCriteria): Promise<T|null>
 
     create(action: ActionContext, data: CreateRequest<T>): Promise<T>
     update(action: ActionContext, query: FilterCriteria, data: Partial<T>): Promise<T>

@@ -1,18 +1,20 @@
 import { EntityInstance } from "../../typeful/typeful"
+import condition, { ConditionEntity } from "./condition"
 
 export default {
     type: 'schema',
     fields: {
         type: {type: 'string'},
         arguments: {type: 'json'},
-        shouldBeMet: {type: 'bool'},
+
+        if: condition,
     },
 }
 
-export type ConditionEntity = EntityInstance & {
+export type ActionStruct = {
     type: string,
     arguments: Record<string, unknown>,
 
-    /** undefined should be interpreted as true */
-    shouldBeMet?: boolean,
+    if?: ConditionEntity,
 }
+export type ActionEntity = EntityInstance & ActionStruct

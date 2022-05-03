@@ -11,6 +11,8 @@ export type ActionContext = {
     actor: string|null,
     actorRoles: string[],
     moment: Date,
+
+    [key: string]: unknown,
 }
 
 type ActionContextDevOptions = {
@@ -43,11 +45,17 @@ export default function actionContextFactory(jwtService: JwtService, tfa: Typefu
             }
         }
 
+        const moment = new Date()
+        if (ctx.headers['time-travel'] && process.env.DEBUG_ALLOW_TIME_TRAVEL) {
+            moment.setDate(moment.getDate() + 4)
+        }
+
+
         ctx.actionContext = {
             tenant: ctx.request.header['tenant'] || process.env.TENANT_NAME,
             actor,
             actorRoles: roles,
-            moment: new Date(),
+            moment,
         }
 
         if (devOptions?.devAuthCode === ctx.query.devAuth) {
