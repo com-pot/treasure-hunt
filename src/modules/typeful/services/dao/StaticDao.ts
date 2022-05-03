@@ -43,11 +43,10 @@ export default class StaticDao<T extends EntityInstance> implements Dao<T> {
             criteria = {[key]: criteria}
         }
 
-        let item = items.find((check) => {
-            return Object.entries(criteria).every(([name, value]) => get(check, name) === value)
-        }) as T
+        const itemMatchesAllCriteria = (item: T): boolean => Object.entries(criteria || {}).every(([name, value]) => get(item, name) === value)
+        let item = items.find(itemMatchesAllCriteria)
 
-        return item
+        return item ?? null
     }
 
     public async count(action: ActionContext): Promise<number> {
@@ -82,7 +81,7 @@ export default class StaticDao<T extends EntityInstance> implements Dao<T> {
         })[0]
 
         if (!file) {
-            return Promise.reject(new Error(`No file for '${this.config.meta.entityFqn}'`))
+            return Promise.reject(new Error(`No file for ${actionContext.tenant}#${this.config.meta.entityFqn} - ` + dataFilePattern))
         }
 
         const ext = path.extname(file)

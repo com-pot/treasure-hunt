@@ -23,13 +23,13 @@ describe('Progression', function () {
   })
 
   it("checks answer - incorrect", async function() {
-    const errResult = await playerApi.json.post('/treasure-hunt/progression/pochop/answer', {checkSum: '2'})
+    const errResult = await playerApi.json.post('/treasure-hunt/progression/pochop/answer', {value: '2'})
     expect(errResult.status).to.equal('ko')
-    expect(errResult.errorActions).to.deep.equal([['message', "Ale né musíme to zkusit znova!"]])
+    expect(errResult.evaluationEffects).to.deep.equal([['message', "Ale né musíme to zkusit znova!"]])
   })
 
   it("checks answer - correct", async function() {
-    const okResult = await playerApi.json.post('/treasure-hunt/progression/pochop/answer', {checkSum: '3'})
+    const okResult = await playerApi.json.post('/treasure-hunt/progression/pochop/answer', {value: '3'})
     expect(okResult.progression).to.be.an('array', 'result should contain progression list')
     expect(okResult.progression).to.have.lengthOf(2, 'progression should have 1 new item')
     expect(okResult.progression[1].slug).to.equal('pozdrav', 'new progression item should be "pozdrav"')

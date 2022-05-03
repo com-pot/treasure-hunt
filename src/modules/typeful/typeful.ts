@@ -1,5 +1,7 @@
 import { ObjectId } from "mongodb"
 import { IntegrityContext, SanitizeOptions, ValidationScope } from "./services/IntegrityService"
+import { ModelService } from "./services/ModelService"
+import TypefulAccessor from "./services/TypefulAccessor"
 import { SchemaSpec } from "./types/schema"
 
 
@@ -55,3 +57,7 @@ export type TypefulModule = {
 }
 
 export const defineEntity = <T extends EntitySpec>(spec: T): T => spec
+
+export function defineModelServiceFactory<TEnt extends EntityInstance, TService extends ModelService<TEnt>>(factory: (tfa: TypefulAccessor, fqn: string) => TService) {
+    return factory
+}

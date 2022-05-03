@@ -4,6 +4,7 @@ import ModelService from "../../typeful/services/ModelService";
 import TypefulAccessor from "../../typeful/services/TypefulAccessor";
 import { PlayerEntity } from "./player";
 import { PlayerProgressionEntity } from "./player-progression";
+import { StoryPartEntity } from "./story-part";
 
 export const create = (tfa: TypefulAccessor, model: string) => {
     return {
@@ -30,6 +31,38 @@ export const create = (tfa: TypefulAccessor, model: string) => {
             }
 
             return progression
+        },
+
+        async ensureProgressionExists(ctx: ActionContext, player: PlayerEntity, storyPart: StoryPartEntity): Promise<PlayerProgressionEntity> {
+            let progressionItem = await this.dao.findOne(ctx, {player, storyPart})
+            if (!progressionItem) {
+                progressionItem = await this.dao.create(ctx, {
+                    player: player._id,
+                    storyPart: storyPart._id,
+                    status: 'new',
+                    data: null,
+                })
+            }
+
+            return progressionItem
+        },
+
+        async findActiveTimeouts(ctx: ActionContext, player: PlayerEntity): Promise<PlayerProgressionEntity[]> {
+            const list = await this.dao.list(ctx, {
+                player,
+                '!timeout': null,
+            })
+            let items = list.items.filter((item) => {
+                if (!item.timeout) {
+                    return false
+                }
+                if (item.timeout.until <= ctx.moment) {
+                    return false
+                }
+
+                return true
+            })
+            return items
         }
     }
 }
