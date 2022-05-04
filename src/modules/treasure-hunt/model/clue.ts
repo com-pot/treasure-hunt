@@ -19,6 +19,7 @@ export default {
         name: {type: 'string'},
         slug: {type: 'string', format: 'slug', minLength: 1},
         story: {type: 'relation', target: 'treasure-hunt.story'},
+        tags: {type: 'list', innerType: {type: 'string'}},
 
         onReveal: {
             type: 'list',
@@ -42,6 +43,7 @@ export type ClueEntity = EntityInstance & {
     name: string,
     slug: string,
     story: EntityRef<StoryEntity>,
+    tags?: string[],
 
     onReveal: ActionEntity[],
 

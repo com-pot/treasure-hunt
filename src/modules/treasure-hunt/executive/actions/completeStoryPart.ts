@@ -20,15 +20,14 @@ export default defineActionType({
         }
         const player = ctx.player as PlayerEntity
 
-        const order = storyPart.order + 1
-        const nextStoryPart = await storyPartsService.dao.findOne(ctx, {story: player.story, order})
+        const nextStoryPart = await storyPartsService.dao.findOne(ctx, {story: player.story, order: storyPart.order + 1})
 
         const result: CompleteStoryPartResult = {}
         if (nextStoryPart) {
             result.unlockedProgression = await progressionService.ensureProgressionExists(ctx, player, nextStoryPart)
 
             const count = await storyPartsService.dao.count(ctx, {story: player.story})
-            if (order === count) {
+            if (nextStoryPart.order === count) {
                 const trophies = tfa.getModel<TrophyService>('treasure-hunt.trophy')
                 result.trophy = await trophies.ensurePlayerHasTrophy(ctx, player, player.story)
             }

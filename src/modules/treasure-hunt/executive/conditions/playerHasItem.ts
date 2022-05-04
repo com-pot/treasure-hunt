@@ -1,9 +1,17 @@
 import { defineConditionType } from "../../../typeful-executive/executive";
-import { PlayerEntity } from "../../model/player";
+import player, { PlayerEntity } from "../../model/player";
 
 export default defineConditionType({
     arguments: {
         itemName: {type: 'string'},
+        anyOf: {
+            type: 'list',
+            innerType: {type: 'string'},
+        },
+        allOf: {
+            type: 'list',
+            innerType: {type: 'string'},
+        },
     },
     evaluate: (tfa, ctx, args, onError) => {
         const player = ctx.player as PlayerEntity
@@ -11,10 +19,18 @@ export default defineConditionType({
             onError?.('invalid-context', {missing: 'player'})
             return false
         }
-
-        const itemName = args.itemName as string
-        if (!itemName || typeof itemName !== 'string') {
-            onError?.('invalid-arguments', {invalidKeys: {itemName: 'not-a-string'}})
+        const evaluators: ItemPresenceEvaluator[] = []
+        if (args.itemName && typeof args.itemName === 'string') {
+            evaluators.push(itemPresenceEvaluators.itemName(args.itemName))
+        }
+        if (Array.isArray(args.anyOf) && args.anyOf.length) {
+            evaluators.push(itemPresenceEvaluators.anyOf(args.anyOf))
+        }
+        if (Array.isArray(args.allOf) && args.allOf.length) {
+            evaluators.push(itemPresenceEvaluators.allOf(args.allOf))
+        }
+        if (!evaluators.length) {
+            onError?.('invalid-arguments', {reason: 'no-spec-present', expectedProps: ['itemName', 'anyOf', 'allOf']})
             return false
         }
 
@@ -22,6 +38,19 @@ export default defineConditionType({
             return false
         }
 
-        return player.itemBag.includes(itemName)
+        return evaluators.every((evaluator) => evaluator(player.itemBag!))
     },
 })
+
+type ItemPresenceEvaluator = (itemBag: string[]) => boolean
+const itemPresenceEvaluators = {
+    itemName: (itemName: string): ItemPresenceEvaluator => {
+        return (playerBag) => playerBag.includes(itemName)
+    },
+    anyOf: (items: string[]): ItemPresenceEvaluator => {
+         return (playerBag) => items.some((itemName) => playerBag.includes(itemName))
+    },
+    allOf: (items: string[]): ItemPresenceEvaluator => {
+        return (playerBag) => items.every((itemName) => playerBag.includes(itemName))
+    },
+}

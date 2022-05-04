@@ -69,11 +69,9 @@ export const create = (tfa: TypefulAccessor, model: string) => {
             if (player.itemBag.includes(itemName)) {
                 return
             }
-            console.log(player.itemBag, itemName);
 
             player.itemBag.push(itemName)
             await this.dao.update(action, player, player)
-            console.log(player);
 
         }
     }

@@ -9,6 +9,16 @@ export const create = defineModelServiceFactory((tfa, fqn) => {
     return {
         ...ModelService.create<ConditionEntity>(tfa, fqn),
 
+        /**
+         * Evaluates condition using its argument and given action context
+         *
+         * Returns condition.shouldBeMet === evaluate
+         *
+         * @param action
+         * @param condition
+         * @param onError
+         * @returns
+         */
         async evaluateCondition(action: ActionContext, condition: ConditionEntity, onError?: ConditionEvaluationErrorHandler): Promise<boolean> {
             // for now, the _id is required for typing as static daos are not entirely
             const conditionTypesDao = tfa.getDao<ConditionTypeController & {_id: ObjectId}>('typeful-executive.condition-type')
@@ -18,7 +28,10 @@ export const create = defineModelServiceFactory((tfa, fqn) => {
                 return false
             }
 
-            return await conditionController.evaluate(tfa, action, condition.arguments, onError)
+            const isMet = await conditionController.evaluate(tfa, action, condition.arguments, onError)
+            const shouldBeMet = condition.shouldBeMet !== false
+
+            return isMet === shouldBeMet
         },
     }
 })

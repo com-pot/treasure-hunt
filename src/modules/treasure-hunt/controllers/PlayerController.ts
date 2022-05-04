@@ -23,7 +23,7 @@ export default class PlayerController {
         const progression = await progressionModel.getProgression(actionContext, player)
 
         const storyPartIds = progression.map((p) => p.storyPart)
-        const storyParts = (await storyPartsCollection.list(actionContext, {_id: storyPartIds})).items
+        const storyParts = (await storyPartsCollection.list(actionContext, {_id: storyPartIds}, undefined, {page: 1, perPage: 1000})).items
 
         return storyParts.map((sp) => {
             const progressItem = progression.find((p) => sp._id.equals(p.storyPart))

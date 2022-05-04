@@ -11,7 +11,7 @@ export const create = (tfa: TypefulAccessor, model: string) => {
         ...ModelService.create<PlayerProgressionEntity>(tfa, model),
 
         async getProgression(action: ActionContext, player: PlayerEntity): Promise<PlayerProgressionEntity[]> {
-            let progression = (await this.dao.list(action, {player})).items
+            let progression = (await this.dao.list(action, {player}, undefined, {page: 1, perPage: 1000})).items
 
 
             if (!progression.length) {
@@ -35,6 +35,8 @@ export const create = (tfa: TypefulAccessor, model: string) => {
 
         async ensureProgressionExists(ctx: ActionContext, player: PlayerEntity, storyPart: StoryPartEntity): Promise<PlayerProgressionEntity> {
             let progressionItem = await this.dao.findOne(ctx, {player, storyPart})
+            console.log('ensureProgressionExists', storyPart.slug, progressionItem);
+
             if (!progressionItem) {
                 progressionItem = await this.dao.create(ctx, {
                     player: player._id,
@@ -63,7 +65,22 @@ export const create = (tfa: TypefulAccessor, model: string) => {
                 return true
             })
             return items
-        }
+        },
+
+        async findTimeouts(ctx: ActionContext, player: PlayerEntity): Promise<PlayerProgressionEntity[]> {
+            const list = await this.dao.list(ctx, {
+                player,
+                '!timeout': null,
+            })
+            let items = list.items.filter((item) => {
+                if (!item.timeout) {
+                    return false
+                }
+
+                return true
+            })
+            return items
+        },
     }
 }
 

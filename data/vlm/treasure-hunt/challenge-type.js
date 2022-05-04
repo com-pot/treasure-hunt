@@ -6,5 +6,20 @@ export default {
         {
             type: 'time-tables',
         },
+        {
+            type: 'clue-chase',
+            params: {
+                correctPath: {
+                    type: 'list',
+                    innerType: {type: 'string'},
+                },
+            },
+        },
+        {
+            type: 'counter-selection',
+        },
+        {
+            type: 'skull-lite',
+        }
     ],
 }
