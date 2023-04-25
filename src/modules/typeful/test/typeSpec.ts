@@ -1,4 +1,4 @@
-import { expect } from "chai"
+import { describe, it, expect } from "vitest"
 
 // When using modules from .ts files, import syntax cannot be used
 import defaultTypesModule from "../defaultTypesModule"

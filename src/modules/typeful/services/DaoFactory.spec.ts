@@ -1,5 +1,4 @@
-import { expect } from "chai";
-import { describe } from "mocha";
+import { describe, it, expect } from "vitest";
 import dummyItemModelEntry from "../test/dummyItemModelEntry";
 import { Dao } from "./dao/Daos";
 import DaoFactory from "./DaoFactory";

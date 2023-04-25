@@ -1,3 +1,4 @@
+import { describe } from "vitest"
 import typeSpec from "../test/typeSpec"
 import schema, { SchemaSpec } from "./schema"
 

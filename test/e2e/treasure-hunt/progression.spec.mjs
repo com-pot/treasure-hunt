@@ -1,4 +1,4 @@
-import { expect } from "chai";
+import { describe, it, expect } from "vitest";
 import testUtils from "../../utils/testUtils.mjs";
 
 describe('Progression', function () {

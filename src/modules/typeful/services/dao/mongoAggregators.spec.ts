@@ -1,4 +1,4 @@
-import { expect } from "chai"
+import { describe, it, expect } from "vitest"
 import dummyItemModelEntry from "../../test/dummyItemModelEntry"
 import { FilterCriteria } from "./Daos"
 import mongoAggregators from "./mongoAggregators"
