@@ -1,0 +1,29 @@
+version: "3.9"
+services:
+  th-backend:
+    image: node:18
+    ports:
+      - "8000:3000"
+    depends_on:
+      - th-mongo
+    volumes:
+      - ../:/apps/treasure-hunt
+    environment:
+      - MONGO_URL=mongodb://root:treasure-hunt@th-mongo:27017/treasure-hunt?authMechanism=DEFAULT&authSource=admin
+    working_dir: /apps/treasure-hunt
+    command: npm run start
+
+
+  th-mongo:
+    image: "mongo:5"
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: treasure-hunt
+    volumes:
+      - mongo-data:/db/data
+    ports:
+      - 27017:27017
+
+volumes:
+  mongo-data:
