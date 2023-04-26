@@ -16,6 +16,7 @@ export const entities = {
         stringify: {
             template: '{{title}} [{{story}}#{{slug}}]'
         },
+        defaultSort: {order: 1},
     },
     'challenge-type': {
         primaryKey: 'type',
