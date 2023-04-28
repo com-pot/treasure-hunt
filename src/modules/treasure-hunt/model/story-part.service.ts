@@ -49,7 +49,7 @@ export const create = (tfa: TypefulAccessor, fqn: string) => {
                 await actionService.executeAction(action, effect)
             }
 
-            const timeoutAction = checkResult.evaluationEffects?.find((errAction) =>  errAction.type === 'timeout')
+            const timeoutAction = checkResult.evaluationEffects?.find((errAction) =>  errAction.type === 'timeout' || errAction.type === 'treasure-hunt.startTimeout')
             const updateProgression: Partial<typeof progression> = {}
             if (timeoutAction) {
                 const until = new Date(action.moment)

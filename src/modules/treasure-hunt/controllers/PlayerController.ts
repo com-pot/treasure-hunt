@@ -10,6 +10,8 @@ import { StoryPartEntity } from "../model/story-part"
 import { AnswerAttempt, StoryPartService } from "../model/story-part.service"
 import { TreasureHuntContentService } from "../model/_content.service"
 
+import playerHasItem from "../executive/conditions/playerHasItem"
+
 
 export default class PlayerController {
     constructor(private readonly tfa: TypefulAccessor) {
@@ -108,5 +110,10 @@ export default class PlayerController {
 
         const revealedClue = await clueService.revealClue(action, clue)
         return clueService.preparePlayerClue(action, player, revealedClue)
+    }
+
+    async checkBag(action: ActionContext, queryItems: string[]) {
+        return queryItems
+            .filter((itemName) => playerHasItem.evaluate(null as any, action, {itemName}, undefined))
     }
 }

@@ -16,5 +16,8 @@ export default {
         {
             type: 'ckSequence',
         },
+        {
+            type: 'field-activity',
+        },
     ],
 }

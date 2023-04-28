@@ -6,6 +6,7 @@ import playerInteractedWithStoryPart from "./conditions/playerInteractedWithStor
 import noActiveTimeout from "./conditions/noActiveTimeout";
 
 import collectItem from "./actions/collectItem";
+import startTimeout from "./actions/startTimeout";
 import completeStoryPart from "./actions/completeStoryPart";
 import uiDisplayContent from "./actions/ui-displayContent";
 
@@ -20,8 +21,8 @@ export default defineExecutiveModule({
     actionTypes: {
         collectItem,
         completeStoryPart,
+        startTimeout,
 
         'ui.displayContent': uiDisplayContent,
-
     },
 })
