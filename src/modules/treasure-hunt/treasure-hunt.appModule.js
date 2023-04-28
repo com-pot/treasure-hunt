@@ -43,6 +43,7 @@ const createPlayerRouter = (serviceContainer) => {
     const ensurePlayer = requirePlayer(serviceContainer.typefulAccessor)
     router.use('/progression', ensurePlayer)
     router.use('/clue', ensurePlayer)
+    router.use('/bag', ensurePlayer)
 
     const playerCtrl = new PlayerController(serviceContainer.typefulAccessor)
     router.get('/progression', async (ctx) => {
@@ -59,6 +60,12 @@ const createPlayerRouter = (serviceContainer) => {
 
     router.post('/clue/:key', async (ctx) => {
         ctx.body = await playerCtrl.revealClue(ctx.actionContext, ctx.player, ctx.params.key)
+    })
+
+    router.post('/bag/inquiry', async (ctx) => {
+        ctx.body = {
+            items: await playerCtrl.checkBag(ctx.actionContext, ctx.request.body.items),
+        }
     })
 
     return router

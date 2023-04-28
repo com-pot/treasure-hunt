@@ -15,6 +15,7 @@ export default defineConditionType({
     },
     evaluate: (tfa, ctx, args, onError) => {
         const player = ctx.player as PlayerEntity
+        console.log(player, args)
         if (!player) {
             onError?.('invalid-context', {missing: 'player'})
             return false
@@ -45,7 +46,11 @@ export default defineConditionType({
 type ItemPresenceEvaluator = (itemBag: string[]) => boolean
 const itemPresenceEvaluators = {
     itemName: (itemName: string): ItemPresenceEvaluator => {
-        return (playerBag) => playerBag.includes(itemName)
+        return (playerBag) => {
+            console.log(itemName, 'in?', playerBag, ': ', playerBag.includes(itemName))
+
+            return playerBag.includes(itemName)
+        }
     },
     anyOf: (items: string[]): ItemPresenceEvaluator => {
          return (playerBag) => items.some((itemName) => playerBag.includes(itemName))
