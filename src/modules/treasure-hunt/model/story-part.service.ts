@@ -95,7 +95,7 @@ export const create = (tfa: TypefulAccessor, fqn: string) => {
                     arguments: {
                         slug: storyPart.slug,
                     },
-                }, (err, details) => console.error(err, details))
+                }, (err, data) => console.error(err, data))
                 checkResult.trophy = result.trophy
             }
 

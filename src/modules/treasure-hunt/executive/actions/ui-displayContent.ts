@@ -5,10 +5,10 @@ export default defineActionType({
     arguments: {
         template: {type: 'string'},
         args: {
-            type: 'list',
-            innerType: {
-                type: 'schema',
-                fields: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
                     type: {type: 'string'},
                     arguments: {type: 'string'},
                 },

@@ -9,10 +9,14 @@ export default {
         {
             type: 'clue-chase',
             params: {
-                correctPath: {
-                    type: 'list',
-                    innerType: {type: 'string'},
+                type: "object",
+                properties: {
+                    correctPath: {
+                        type: 'array',
+                        items: {type: 'string'},
+                    },
                 },
+                required: ["correctPath"],
             },
         },
         {

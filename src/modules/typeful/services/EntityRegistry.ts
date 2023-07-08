@@ -1,4 +1,4 @@
-import { createEntityEndpoints, EntityEndpoints } from "../model/schema"
+import { createEntityEndpoints, EntityEndpoints } from "../model/model"
 import { EntityConfig, TypefulModule } from "../typeful"
 
 

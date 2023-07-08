@@ -1,39 +1,33 @@
 import ApiAdapter from "./ApiAdapter.mjs";
 
+import { loadEnv } from "vite"
 
 let instances = {}
 
 /**
  *
- * @param {string} [authToken]
+ * @param {object} opts
+ * @param {string} opts.baseUrl
+ * @param {string} [opts.authToken]
+ * @param {string} [opts.devAuth]
  * @returns
  */
-function createTestApi(authToken) {
+function createTestApi(opts) {
   const defaultHeaders = {
     Accept: 'application/json',
   }
-  if (authToken) {
-    defaultHeaders.Authorization = 'Bearer ' + authToken
-  }
-
-  const baseUrl = process.env.TEST_API_BASE_URL
-  if (!baseUrl) {
-    throw new Error("Missing variable TEST_API_BASE_URL")
+  if (opts.authToken) {
+    defaultHeaders.Authorization = 'Bearer ' + opts.authToken
   }
 
   const apiAdapter = new ApiAdapter({
-    baseUrl,
+    baseUrl: opts.baseUrl,
     defaultHeaders,
   })
   apiAdapter.middleware.req.push((config) => {
-    const devAuth = process.env.BACKSTAGE_DEV_AUTH
-    if (!devAuth) {
-      return
-    }
-    if (!config.query) {
-      config.query = {}
-    }
-    config.query['devAuth'] = devAuth
+    if (!opts.devAuth) return
+    if (!config.query) config.query = {}
+    config.query['devAuth'] = opts.devAuth
   })
 
   return apiAdapter
@@ -42,18 +36,39 @@ function createTestApi(authToken) {
 export default {
   /**
    *
-   * @param {true|string} [auth]
+   * @param {true|string} [authToken]
    * @returns {ApiAdapter}
    */
-  useApi(auth) {
-    if (auth === true) {
-      return instances.testApiAuth || (instances.testApi = createTestApi(process.env.TEST_API_AUTH_TOKEN))
+  useApi(authToken) {
+    const env = loadEnv("", process.cwd(), '')
+
+    const baseUrl = env.TEST_API_BASE_URL
+    if (!baseUrl) {
+      throw new Error("Missing env variable TEST_API_BASE_URL")
     }
-    if (auth) {
-      return createTestApi(auth)
+    const devAuth = env.BACKSTAGE_DEV_AUTH
+
+    const opts = {
+      baseUrl,
+      devAuth,
+    }
+    if (authToken === true) {
+      if (!instances.testApiAuth) {
+        opts.authToken = env.TEST_API_AUTH_TOKEN
+        instances.testApiAuth = createTestApi(opts)
+      }
+
+      return instances.testApiAuth
+    }
+    if (authToken) {
+      opts.authToken = authToken
+      return createTestApi(opts)
     }
 
-    return instances.testApi || (instances.testApi = createTestApi())
+    if (!instances.testApi) {
+      instances.testApi = createTestApi(opts)
+    }
+    return instances.testApi
   },
 
   /**

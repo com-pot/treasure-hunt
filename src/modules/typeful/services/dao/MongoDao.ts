@@ -88,7 +88,7 @@ export default class MongoDao<T extends EntityInstance> implements Dao<T> {
         const result = await this.collection.insertOne(sanitized)
 
         if (!result.acknowledged) {
-            throw Object.assign(new Error('save-failed'), {status: 500, details: result})
+            throw new AppError('save-failed', 500, result)
         }
 
         return sanitized

@@ -1,6 +1,7 @@
 import glob from "glob";
 import path from "path";
 import { AppModule } from "./types/app";
+import appLogger from "./appLogger"
 
 import { EntityConfig, TypefulModule } from "../modules/typeful/typeful";
 
@@ -21,7 +22,7 @@ export const getModules = async (dir: string): Promise<Record<string, AppModule>
 
         module.entities && Object.entries(module.entities).forEach(([eName, config]) => {
             if (!config.schema) {
-                console.warn("Entity " + eName + " does not have model specified");
+                appLogger.warn({module: name, entity: eName}, "Entity does not have schema specified");
             }
         })
 
@@ -44,6 +45,9 @@ const initializeEntities = async (cwd: string, moduleDir: string, entities?: Rec
     if (!entities) {
         entities = {}
     }
+
+    const logger = appLogger.child({s: "bootstrap", moduleDir})
+
     const pattern = `${moduleDir}/model/*`
     const foundFiles = glob.sync(pattern, {cwd})
 
@@ -53,7 +57,7 @@ const initializeEntities = async (cwd: string, moduleDir: string, entities?: Rec
     for (const path of foundFiles) {
         const match = path.match(fileNameClassifierPattern)
         if (!match) {
-            console.warn("Misclassified file " + path);
+            logger.warn({path}, "Misclassified file ");
             continue
         }
 
@@ -70,13 +74,13 @@ const initializeEntities = async (cwd: string, moduleDir: string, entities?: Rec
         }
 
         if (entity._plugins[type]) {
-            console.warn(`File '${path}' should be a ${type} but the entity config already has this field configured. Ignoring file.`);
+            logger.warn(`File '${path}' should be a ${type} but the entity config already has this field configured. Ignoring file.`);
             continue
         }
 
         initFilePromises.push(import(path).then((module) => {
             if (!entity._plugins) {
-                console.warn(`Failed to initialize module '${type}' on entity ${entityName}`)
+                logger.warn(`Failed to initialize module '${type}' on entity ${entityName}`)
                 return
             }
 
@@ -94,7 +98,7 @@ const initializeEntities = async (cwd: string, moduleDir: string, entities?: Rec
     const validEntityEntries = Object.entries(entities)
         .filter(([name, config]) => {
             if (!config.schema) {
-                console.warn(`Entity '${name}' did not load properly, ignoring`);
+                logger.warn({entity: name}, `Entity did not load properly, ignoring`);
                 return false
             }
             return true

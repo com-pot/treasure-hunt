@@ -1,10 +1,10 @@
 import { EntityInstance } from "../../typeful/typeful"
 
 export default {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         type: {type: 'string'},
-        arguments: {type: 'json'},
+        arguments: { type: "object", additionalProperties: true, format: "json" },
         shouldBeMet: {type: 'bool'},
     },
 }

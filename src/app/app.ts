@@ -11,13 +11,20 @@ import AppError from "./AppError";
 import { getModules } from "./bootstrap";
 import { createServiceContainer } from "./serviceContainer";
 import { loadFromFiles } from "./Config";
+import appLogger from "./appLogger";
+
+const logger = appLogger.child({name: "app"})
 
 
 export const createApp = async () => {
+    logger.info("loading config")
     const config = await loadFromFiles(path.resolve(process.cwd(), 'src/config'))
+    logger.info("crawling modules")
     const modules = await getModules(path.resolve(process.cwd(), 'src/modules'))
+    logger.info("building service container")
     const serviceContainer = await createServiceContainer(modules, config)
 
+    logger.info("composing app")
     const app = new Koa()
     app.context.container = serviceContainer
     app.use(cors({
@@ -38,6 +45,7 @@ export const createApp = async () => {
     })
     backstageRouter.use(requireBackstageManager())
 
+    logger.info("initializing modules")
     const allReady = Object.entries(modules).map(async ([, module]) => {
         const moduleData = await (module.startUp?.(serviceContainer))
         const router = module.router || (moduleData?.router)
@@ -75,10 +83,10 @@ createApp()
     .then((app) => {
         const port = process.env.APP_PORT || 3000
         app.listen(port, () => {
-            console.log("listening on " + port);
+            logger.info("app listening", {port});
         })
     })
     .catch((err) => {
-        console.error("App initialization error", err);
+        logger.error({err});
         process.exit(1)
     })

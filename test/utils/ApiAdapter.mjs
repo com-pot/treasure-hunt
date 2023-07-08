@@ -107,6 +107,7 @@ async function unwrapSuccessfulJson(response) {
   return json
 }
 
+const HttpErrorResponses = new WeakMap()
 class HttpError extends Error {
   /**
    *
@@ -117,8 +118,12 @@ class HttpError extends Error {
   constructor(message, response, responseBody) {
     super(message)
 
-    this.response = response
     this.responseBody = responseBody
+    HttpErrorResponses.set(this, response)
+  }
+
+  getResponse() {
+    return HttpErrorResponses.get(this)
   }
 }
 

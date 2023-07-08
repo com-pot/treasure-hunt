@@ -2,52 +2,50 @@ import { ActionStruct } from "../../typeful-executive/model/action"
 import { EntityInstance, EntityRef } from "../../typeful/typeful"
 
 const ChallengeActionEffect = {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         name: {type: 'string'},
         arguments: {
-            type: 'list',
-            innerType: {type: 'string'},
+            type: 'array',
+            items: {type: 'string'},
         },
     },
 }
 
 const ChallengeClueUsage = {
-    type: 'schema',
-    fields: {
-        clue: {type: 'relation', target: 'treasure-hunt.clue'},
+    type: 'object',
+    properties: {
+        clue: { type: 'relation', target: 'treasure-hunt.clue' },
         effect: {
-            type: 'schema',
-            fields: {
-                whenActive: { type: 'json' },
-                whenWrongOrder: {type: 'json' },
+            type: 'object',
+            properties: {
+                whenActive: { type: "object", additionalProperties: true, format: "json" },
+                whenWrongOrder: { type: "object", additionalProperties: true, format: "json" },
             },
         },
     },
 }
 const ChallengeCluesSetup = {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         strategy: {const: 'linear-path'},
 
         list: {
             type: 'array',
-            innerType: ChallengeClueUsage,
+            items: ChallengeClueUsage,
         },
-        clueDefaults: {
-            type: 'json',
-        },
+        clueDefaults: { type: "object", additionalProperties: true, format: "json" },
     },
 }
 
 export default {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         name: {type: 'string'},
         description: {type: 'string'},
         type: {type: 'relation', target: 'treasure-hunt.challenge-type'},
-        challengeConfig: {type: 'json'},
-        onError: {type: 'list'},
+        challengeConfig: {type: 'object', additionalProperties: true, format: "json"},
+        onError: {type: 'array', items: true},
         checkSum: {type: 'string'},
 
         cluesSetup: ChallengeCluesSetup,

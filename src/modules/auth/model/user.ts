@@ -1,21 +1,21 @@
 import { EntityInstance } from "../../typeful/typeful"
 
 const loginMethod = {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         type: {type: 'string'},
-        options: {type: 'json'},
+        options: {type: 'object', additionalProperties: true, format: "json"},
     },
 }
 
 export default {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         login: {type: 'string'},
         email: {type: 'string', mode: 'email'},
         loginMethods: {
-            type: 'list',
-            innerType: loginMethod,
+            type: 'array',
+            items: loginMethod,
         },
     },
 }

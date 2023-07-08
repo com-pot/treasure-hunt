@@ -1,6 +1,6 @@
 export default {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         firstName: {type: 'string'},
         lastName: {type: 'string'},
         nick: {type: 'string'},

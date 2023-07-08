@@ -1,7 +1,7 @@
 export default {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         name: {type: 'string'},
-        arguments: {type: 'json'},
+        arguments: { type: "object", additionalProperties: true, format: "json" },
     },
 }

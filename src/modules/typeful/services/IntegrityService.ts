@@ -27,7 +27,7 @@ export default class IntegrityService {
     validate<T>(spec: SchemaField, subject: T, scope?: ValidationScope): boolean {
         const type = this.typeRegistry.get(spec.type)
         if (!type) {
-            console.error("Unknown type on", spec);
+            console.error("Unknown type on", spec, "available types", this.typeRegistry.listAvailableTypes());
             throw new AppError('typeful.unknown-type', 501, {specType: spec.type})
         }
 

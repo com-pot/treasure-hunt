@@ -5,8 +5,8 @@ import { TreasureHuntContentBlock, TreasureHuntContentBlockEntity } from "./_con
 
 
 export const ClueLocation = {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         location: {type: 'geo-location'},
         radius: {type: 'precision'},
         lastUpdated: {type: 'timestamp'},
@@ -14,23 +14,23 @@ export const ClueLocation = {
 }
 
 export default {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         name: {type: 'string'},
         slug: {type: 'string', format: 'slug', minLength: 1},
         story: {type: 'relation', target: 'treasure-hunt.story'},
-        tags: {type: 'list', innerType: {type: 'string'}},
+        tags: {type: 'array', items: {type: 'string'}},
 
         onReveal: {
-            type: 'list',
-            innerType: action,
+            type: 'array',
+            items: action,
         },
 
         // place: {...ClueLocation, required: false},
 
         contentBlocks: {
-            type: "list",
-            innerType: TreasureHuntContentBlock,
+            type: "array",
+            items: TreasureHuntContentBlock,
         },
     },
 

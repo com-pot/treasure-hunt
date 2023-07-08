@@ -5,12 +5,12 @@ export default defineConditionType({
     arguments: {
         itemName: {type: 'string'},
         anyOf: {
-            type: 'list',
-            innerType: {type: 'string'},
+            type: 'array',
+            items: {type: 'string'},
         },
         allOf: {
-            type: 'list',
-            innerType: {type: 'string'},
+            type: 'array',
+            items: {type: 'string'},
         },
     },
     evaluate: (tfa, ctx, args, onError) => {

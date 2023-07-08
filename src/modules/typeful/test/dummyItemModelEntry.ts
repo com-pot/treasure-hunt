@@ -3,7 +3,7 @@ import { EntityConfigEntry } from "../services/EntityRegistry";
 const dummyItemModelEntry: EntityConfigEntry = {
     _plugins: {},
     schema: {
-        type: 'schema', fields: {},
+        type: 'object', properties: {},
     },
     primaryKey: 'id',
     persistence: 'dummy',

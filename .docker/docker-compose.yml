@@ -9,6 +9,7 @@ services:
     volumes:
       - ../:/apps/treasure-hunt
     environment:
+      - DEV=1
       - MONGO_URL=mongodb://root:treasure-hunt@th-mongo:27017/treasure-hunt?authMechanism=DEFAULT&authSource=admin
     working_dir: /apps/treasure-hunt
     command: npm run start

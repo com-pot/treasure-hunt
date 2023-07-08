@@ -3,8 +3,8 @@ import { PlayerEntity } from "./player"
 import { StoryEntity } from "./story"
 
 export default {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         player: {type: 'relation', target: 'treasure-hunt.player'},
         story: {type: 'relation', target: 'treasure-hunt.story'},
         order: {type: 'number'},

@@ -1,5 +1,5 @@
 export default class AppError extends Error {
-    constructor(message: string, public readonly status: number = 500, public readonly details?: object|string)
+    constructor(message: string, public readonly status: number = 500, public readonly data?: object|string)
     {
         super(message)
     }

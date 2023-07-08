@@ -1,5 +1,5 @@
 import {toPath} from 'lodash';
-import { isSchemaSpec, SchemaSpec } from "./types/schema";
+import { isSchemaSpec, SchemaSpec } from "./types/object";
 
 export type SchemaField = {
     type: string,
@@ -17,7 +17,7 @@ export function getSchemaField(spec: SchemaSpec, path: string): SchemaField|unde
         if (!result || !isSchemaSpec(result)) {
             return undefined
         }
-        result = result.fields[part]
+        result = result.properties[part]
     }
 
     return result

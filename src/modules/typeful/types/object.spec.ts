@@ -1,11 +1,11 @@
 import { describe } from "vitest"
 import typeSpec from "../test/typeSpec"
-import schema, { SchemaSpec } from "./schema"
+import schema, { SchemaSpec } from "./object"
 
 describe('types/schema', function() {
     const schemaConfig: SchemaSpec = {
-        type: 'schema',
-        fields: {
+        type: 'object',
+        properties: {
             name: {type: 'string', defaultValue: 'document'},
             format: {type: 'string', required: true},
             pageCount: {type: 'number'},
@@ -25,15 +25,16 @@ describe('types/schema', function() {
     })
 
     const nestedConfig: SchemaSpec = {
-        type: 'schema',
-        fields: {
+        type: 'object',
+        properties: {
             stats: {
-                type: 'schema',
-                fields: {
+                type: 'object',
+                properties: {
                     createdAt: {type: 'string', required: true},
-                }
-            }
+                },
+            },
         },
+        required: ["stats"],
     }
     describe('nested config - ' + typeSpec.stringify(nestedConfig), function() {
         const integrityService = typeSpec.createIntegrityService()

@@ -2,13 +2,13 @@ import { defineTypefulType } from "../typeful"
 import { SchemaField } from "../typeSystem"
 
 export type SchemaSpec = SchemaField & {
-    type: 'schema',
-    fields: Record<string, SchemaField>,
+    type: 'object',
+    properties: Record<string, SchemaField>,
 }
 type SchemaValue = Record<string, unknown>
 
 export const isSchemaSpec = (subj: SchemaField): subj is SchemaSpec => {
-    return subj.type === 'schema' && 'fields' in subj
+    return subj.type === 'schema' && 'properties' in subj
 }
 
 export default defineTypefulType<SchemaSpec>({
@@ -23,9 +23,9 @@ export default defineTypefulType<SchemaSpec>({
         let allOk = true
         let shallowValidation = false
 
-        for (const name in options.fields) {
+        for (const name in options.properties) {
             const fieldScope = scope?.withPath(name)
-            const field = options.fields[name]
+            const field = options.properties[name]
 
 
             if (!(name in obj)) {
@@ -58,7 +58,7 @@ export default defineTypefulType<SchemaSpec>({
         const obj = value as SchemaValue
 
         Object.keys(obj).forEach((name) => {
-            if (!options.fields[name]) {
+            if (!options.properties[name]) {
                 const allowlist = sanitizeOptions?.allowlist
                 if (!allowlist || !Array.isArray(allowlist) || !allowlist.includes(name)) {
                     delete obj[name as keyof typeof obj]
@@ -66,13 +66,13 @@ export default defineTypefulType<SchemaSpec>({
             }
         })
 
-        Object.entries(options.fields).forEach(([name, field]) => {
+        Object.entries(options.properties).forEach(([name, field]) => {
             const key = name as keyof typeof obj
             if (!(key in obj) && 'defaultValue' in field) {
                 obj[key] = field.defaultValue as never
             }
 
-            if (ctx && 'fields' in field) {
+            if (ctx && 'properties' in field) {
                 const sanitized = obj[key] === undefined ? undefined : ctx.integrity.sanitize(field, obj[key], options)
                 if (sanitized !== undefined) {
                     obj[key] = sanitized

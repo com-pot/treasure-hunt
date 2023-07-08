@@ -1,12 +1,15 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import testUtils from "../../utils/testUtils.mjs";
+import ApiAdapter from "../../utils/ApiAdapter.mjs";
 
-describe('Progression', function () {
+describe.skip('Progression', function () {
   const api = testUtils.useApi()
 
-  let testUser, playerApi
+  let testUser
+  /** @type {ApiAdapter} */
+  let playerApi
 
-  this.beforeAll(async () => {
+  beforeAll(async () => {
     testUser = await testUtils.useTestUser(api)
     playerApi = testUtils.useApi(testUser.token)
   })

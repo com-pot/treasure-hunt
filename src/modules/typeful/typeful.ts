@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb"
 import { IntegrityContext, SanitizeOptions, ValidationScope } from "./services/IntegrityService"
 import { ModelService } from "./services/ModelService"
 import TypefulAccessor from "./services/TypefulAccessor"
-import { SchemaSpec } from "./types/schema"
+import { SchemaSpec } from "./types/object"
 import { SortOrder } from "./services/dao/Daos"
 
 

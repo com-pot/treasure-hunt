@@ -36,7 +36,7 @@ export default class DashboardController {
         }
         const trophy = await trophiesCollection.findOne(actionContext, {player: player._id})
         if (!trophy) {
-            throw new AppError('not-found', 404, {details: "trophy-not-found"})
+            throw new AppError('not-found', 404, {error: "trophy-not-found"})
         }
         if (trophy.redeemedAt) {
             throw new AppError('already-redeemed', 409)

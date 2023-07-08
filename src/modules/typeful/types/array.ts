@@ -2,7 +2,7 @@ import { defineTypefulType } from "../typeful"
 import { SchemaField } from "../typeSystem"
 
 export type ListFieldSpec = SchemaField & {
-    innerType: SchemaField,
+    items: SchemaField,
 }
 
 export default defineTypefulType<ListFieldSpec>({
@@ -13,11 +13,13 @@ export default defineTypefulType<ListFieldSpec>({
         }
 
         let allValid = true
-        const innerType = options.innerType
-        if (ctx?.integrity && innerType) {
+        const itemsSchema = options.items
+        if (ctx?.integrity && itemsSchema) {
             for (let i = 0; i < value.length; i++) {
                 const itemScope = scope?.withPath(`[${i}]`)
-                allValid = allValid && ctx.integrity.validate(innerType, value[i], itemScope)
+                const valueValid = ctx.integrity.validate(itemsSchema, value[i], itemScope)
+
+                allValid = allValid && valueValid
             }
         }
 

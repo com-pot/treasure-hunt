@@ -1,12 +1,12 @@
 import { EntityConfigEntry } from "../services/EntityRegistry"
 
 export default {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         name: {type: 'string'},
         endpoints: {
-            type: 'schema',
-            fields: {
+            type: 'object',
+            properties: {
                 entityAny: {type: 'string'},
                 entityExact: {type: 'string'},
                 collection: {type: 'string'},
@@ -19,7 +19,7 @@ export default {
             entityFqn: {type: 'string'},
             collectionFqn: {type: 'string'},
         },
-        schema: {type: 'json'},
+        schema: { type: "object", additionalProperties: true, format: "json" },
     },
 }
 

@@ -10,8 +10,8 @@ export default (): Middleware => {
                 const status = err.message === 'not-found' && 404;
                 ctx.status = status || err.status || 500;
                 ctx.body = {error: err.message};
-                if (err.details) {
-                    ctx.body.details = err.details
+                if (err.data) {
+                    ctx.body.data = err.data
                 }
             } else {
                 ctx.status = 500

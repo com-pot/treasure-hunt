@@ -3,12 +3,12 @@ import { EntityInstance, EntityRef } from "../../typeful/typeful"
 import { StoryEntity } from "./story"
 
 export default {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         user: {type: 'relation', target: 'auth.user'},
         story: {type: 'relation', target: 'treasure-hunt.story'},
 
-        itemBag: {type: 'list', innerType: 'string'},
+        itemBag: {type: 'array', items: 'string'},
     },
 }
 

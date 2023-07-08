@@ -33,7 +33,7 @@ export type TypefulConfig = {
 export const typesPrefix = ''
 export const types = require('./defaultTypesModule').default.types // eslint-disable-line @typescript-eslint/no-var-requires
 export const entities: AppModule['entities'] = {
-    schema: {
+    model: {
         primaryKey: 'meta.entityFqn',
         persistence: 'static',
     },
@@ -93,8 +93,8 @@ export const startUp = async (serviceContainer: ServiceContainer) => {
     const publicEntities = entityRegistry.entities
         .filter((ent) => ent.publish !== false)
 
-    const schemaDao = typefulAccessor.getDao('typeful.schema') as StaticDao<any>
-    schemaDao.overrideItems(Object.values(publicEntities).map((entity) => {
+    const modelDao = typefulAccessor.getDao('typeful.model') as StaticDao<any>
+    modelDao.overrideItems(Object.values(publicEntities).map((entity) => {
         const publicRepresentation: Partial<typeof entity> = {...entity}
         delete publicRepresentation._plugins
         delete publicRepresentation.persistence

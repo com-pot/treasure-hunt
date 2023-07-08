@@ -12,8 +12,8 @@ export const create = (tfa: TypefulAccessor) => {
                 if (!block.if) {
                     return block
                 }
-                const isMet = await conditionService.evaluateCondition(ctx, block.if, (err, details) => {
-                    console.warn("Error during condition evaluation: ", err, details)
+                const isMet = await conditionService.evaluateCondition(ctx, block.if, (err, data) => {
+                    console.warn("Error during condition evaluation: ", err, data)
                 })
 
                 return isMet ? block : null

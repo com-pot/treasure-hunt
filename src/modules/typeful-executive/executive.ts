@@ -5,7 +5,7 @@ type SchemaFieldSpec = {
     type: string,
     [param: string]: unknown,
 }
-export type ConditionEvaluationErrorHandler = (type: string, details: Record<string, unknown>) => void
+export type ConditionEvaluationErrorHandler = (type: string, data: Record<string, unknown>) => void
 
 export type ConditionTypeController = {
     name: string,

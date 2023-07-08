@@ -1,11 +1,11 @@
 import condition, { ConditionEntity } from "../../typeful-executive/model/condition"
 
 export const TreasureHuntContentBlock = {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         type: {type: 'string'},
-        content: {type: 'json'},
-        if: {...condition, required: false},
+        content: { type: "object", additionalProperties: true, format: "json" },
+        if: condition,
     },
 }
 

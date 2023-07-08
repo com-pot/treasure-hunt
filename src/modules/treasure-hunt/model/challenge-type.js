@@ -1,10 +1,13 @@
 export default {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         type: {type: 'string'},
         params: {
-            type: 'map',
-            innerType: 'type',
+            type: 'object',
+            additionalProperties: {
+                type: "string",
+                "x-enum": "data-type",
+            },
         },
     },
 }

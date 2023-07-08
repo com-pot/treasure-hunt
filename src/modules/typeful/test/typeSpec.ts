@@ -48,14 +48,12 @@ export default {
     },
 
     sanitizeValues<TSpec extends SchemaField>(typeObj: TypefulType<TSpec>, typeConfig: TSpec, sanitizeCases: [unknown, unknown][], integrityService?: IntegrityService) {
-        describe('sanitize', function() {
-            sanitizeCases.forEach(([unsafeValue, expectedValue]) => {
-                it(`sanitizes '${stringify(unsafeValue)}' to '${stringify(expectedValue)}'`, function() {
-                    const actualValue = integrityService
-                        ? integrityService.sanitize(typeConfig, unsafeValue)
-                        : typeObj.sanitize?.(unsafeValue, typeConfig)
-                    expect(actualValue).to.deep.equal(expectedValue)
-                })
+        sanitizeCases.forEach(([unsafeValue, expectedValue]) => {
+            it(`sanitizes '${stringify(unsafeValue)}' to '${stringify(expectedValue)}'`, function() {
+                const actualValue = integrityService
+                    ? integrityService.sanitize(typeConfig, unsafeValue)
+                    : typeObj.sanitize?.(unsafeValue, typeConfig)
+                expect(actualValue).to.deep.equal(expectedValue)
             })
         })
     },

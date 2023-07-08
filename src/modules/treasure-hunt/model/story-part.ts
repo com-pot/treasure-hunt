@@ -4,8 +4,8 @@ import { StoryEntity } from "./story"
 import { TreasureHuntContentBlock, TreasureHuntContentBlockEntity } from "./_content"
 
 export default {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         story: {
             type: 'relation',
             target: 'treasure-hunt.story',
@@ -15,7 +15,7 @@ export default {
         slug: {type: 'string'},
 
         contentBlocks: {
-            type: 'json',
+            type: "object", additionalProperties: true, format: "json",
             description: "HTML content blocks for use with contentController=inline",
         },
         contentHtml: {
@@ -31,8 +31,8 @@ export default {
             type: 'string', enum: ['inline', 'th-blocks'],
         },
         thContentBlocks: {
-            type: 'list',
-            innerType: TreasureHuntContentBlock,
+            type: 'array',
+            items: TreasureHuntContentBlock,
         },
     },
 }

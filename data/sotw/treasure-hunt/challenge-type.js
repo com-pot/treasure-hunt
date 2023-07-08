@@ -3,23 +3,35 @@ export default {
         {
             type: 'anagram',
             params: {
-                inputText: {type: 'string'},
-                outputLength: {type: 'number'},
+                type: "object",
+                properties: {
+                    inputText: {type: 'string'},
+                    outputLength: {type: 'number'},
+                },
+                required: [
+                    "inputText",
+                    "outputLength",
+                ],
             },
         },
         {
             type: 'bpc',
             params: {
-                inputs: {
-                    type: 'list',
-                    innerType: {
-                        type: 'schema',
-                        fields: {
-                            name: {type: 'string', required: true},
-                            caption: {type: 'string'},
+                type: "object",
+                properties: {
+                    inputs: {
+                        type: 'array',
+                        items: {
+                            type: 'object',
+                            properties: {
+                                name: {type: 'string'},
+                                caption: {type: 'string'},
+                            },
+                            required: ["name"],
                         },
                     },
                 },
+                required: ["inputs"],
             },
         },
         {
@@ -41,40 +53,57 @@ export default {
         {
             type: 'password',
             params: {
-                prompt: {type: 'string'},
+                type: "object",
+                properties: {
+                    prompt: {type: 'string'},
+                },
+                required: ["prompt"],
             },
         },
         {
             type: 'toggle-matrix',
             params: {
-                dimensions: {
-                    type: 'schema',
-                    fields: {
-                        width: {type: 'number'},
-                        height: {type: 'number'},
+                type: "object",
+                properties: {
+                    dimensions: {
+                        type: 'object',
+                        properties: {
+                            width: {type: 'number'},
+                            height: {type: 'number'},
+                        },
+                        required: ["width", "height"],
                     },
-                },
-                fields: {
-                    type: 'map',
-                    innerType: {
-                        type: 'list',
-                        fields: {
-                            row: {type: 'number'},
-                            col: {type: 'number'},
-                            key: {type: 'string'},
-                            label: {type: 'string'},
+                    fields: {
+                        type: 'object',
+                        extraProperties: {
+                            type: 'array',
+                            items: {
+                                type: "object",
+                                properties: {
+                                    row: {type: 'number'},
+                                    col: {type: 'number'},
+                                    key: {type: 'string'},
+                                    label: {type: 'string'},
+                                },
+                                required: ["row", "col", "key", "label"],
+                            },
                         },
                     },
                 },
+                required: ["dimensions", "fields"],
             },
         },
         {
             type: 'quick-pick',
             params: {
-                options: {
-                    type: 'list',
-                    innerType: {type: 'string'},
+                type: "object",
+                properties: {
+                    options: {
+                        type: 'array',
+                        items: {type: 'string'},
+                    },
                 },
+                required: ["options"],
             },
         },
         {
@@ -84,21 +113,29 @@ export default {
         {
             type: 'choice.picture',
             params: {
-                urlPrefis: {type: 'string'},
-                options: {type: 'list', innerType: {type: 'string'}},
+                type: "object",
+                properties: {
+                    urlPrefix: {type: 'string'},
+                    options: {
+                        type: 'array',
+                        items: {type: 'string'},
+                    },
+                },
+
             },
         },
         {
             type: "choice.value-label",
             params: {
                 options: {
-                    type: 'list',
-                    innerType: {
-                        type: 'schema',
-                        fields: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
                             value: {type: 'string'},
                             label: {type: 'string'},
                         },
+                        required: ["value", "label"],
                     },
                 },
             },

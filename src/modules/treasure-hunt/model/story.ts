@@ -1,13 +1,13 @@
 import { EntityInstance, EntityRef } from "../../typeful/typeful"
 
 export default {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         key: {type: 'string'},
         title: {type: 'string'},
         authors: {
-            type: 'list',
-            innerType: {
+            type: 'array',
+            items: {
                 type: 'relation',
                 target: 'directory.person',
             },

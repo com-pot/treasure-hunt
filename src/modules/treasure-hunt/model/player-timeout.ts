@@ -2,8 +2,8 @@ import { UserEntity } from "../../auth/model/user"
 import { EntityInstance, EntityRef } from "../../typeful/typeful"
 
 export default {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         since: {type: 'date'},
         until: {type: 'date'},
         clearedAt: {type: 'date'},

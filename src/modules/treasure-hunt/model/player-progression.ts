@@ -4,12 +4,12 @@ import { PlayerEntity } from "./player.js"
 import { StoryPartEntity } from "./story-part.js"
 
 export default {
-    type: 'schema',
-    fields: {
+    type: 'object',
+    properties: {
         player: {type: 'relation', target: 'treasure-hunt.player'},
         storyPart: {type: 'relation', target: 'treasure-hunt.story-part'},
         status: {type: 'string'},
-        data: {type: 'json'},
+        data: { type: "object", additionalProperties: true, format: "json" },
         timeout: playerTimeout,
     },
 }
