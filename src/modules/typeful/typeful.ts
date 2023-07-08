@@ -3,6 +3,7 @@ import { IntegrityContext, SanitizeOptions, ValidationScope } from "./services/I
 import { ModelService } from "./services/ModelService"
 import TypefulAccessor from "./services/TypefulAccessor"
 import { SchemaSpec } from "./types/schema"
+import { SortOrder } from "./services/dao/Daos"
 
 
 type EntityPluginModule = object | {create: (...args: any[]) => any } // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -21,7 +22,9 @@ export type EntityConfig = EntitySpec & {
         unique?: UniqueConstraint[],
     },
     _plugins: Record<string, EntityPluginModule>,
-    primaryKey: Required<EntitySpec['primaryKey']>
+    primaryKey: Required<EntitySpec['primaryKey']>,
+
+    defaultSort?: SortOrder,
 }
 
 export type EntityInstance = {

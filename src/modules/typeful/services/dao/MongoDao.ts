@@ -32,6 +32,9 @@ export default class MongoDao<T extends EntityInstance> implements Dao<T> {
 
         const query = mongoAggregators.filter(filter, this.config)
         const queryCursor = this.collection.find(query)
+        if (!sort && this.config.defaultSort) {
+            sort = this.config.defaultSort
+        }
         if (sort) {
             queryCursor.sort(sort)
         }
