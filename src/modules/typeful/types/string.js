@@ -12,6 +12,10 @@ module.exports.default = {
             scope?.pushError('constraint-error', ['maxLength', options.maxLength])
             return false
         }
+        if (options.enum && !options.enum.includes(value)) {
+            scope?.pushError('constraint-error', ['enum', options.enum])
+            return false
+        }
 
         return true
     },
