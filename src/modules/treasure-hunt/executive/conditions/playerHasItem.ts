@@ -2,15 +2,18 @@ import { defineConditionType } from "../../../typeful-executive/executive";
 import player, { PlayerEntity } from "../../model/player";
 
 export default defineConditionType({
-    arguments: {
-        itemName: {type: 'string'},
-        anyOf: {
-            type: 'array',
-            items: {type: 'string'},
-        },
-        allOf: {
-            type: 'array',
-            items: {type: 'string'},
+    argumentsSchema: {
+        type: "object",
+        properties: {
+            itemName: {type: 'string'},
+            anyOf: {
+                type: 'array',
+                items: {type: 'string'},
+            },
+            allOf: {
+                type: 'array',
+                items: {type: 'string'},
+            },
         },
     },
     evaluate: (tfa, ctx, args, onError) => {

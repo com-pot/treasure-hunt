@@ -2,6 +2,6 @@ export default {
     type: 'object',
     properties: {
         name: {type: 'string'},
-        arguments: { type: "object", additionalProperties: true, format: "json" },
+        argumentsSchema: { type: "object", additionalProperties: true, format: "json" },
     },
 }

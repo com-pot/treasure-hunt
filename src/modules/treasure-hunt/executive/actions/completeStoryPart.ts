@@ -7,8 +7,12 @@ import { TrophyEntity } from "../../model/trophy";
 import { TrophyService } from "../../model/trophy.service";
 
 export default defineActionType({
-    arguments: {
-        slug: {type: 'relation', target: 'treasure-hunt.story-part'},
+    argumentsSchema: {
+        type: "object",
+        properties: {
+            slug: {type: 'relation', target: 'treasure-hunt.story-part'},
+        },
+        required: ["slug"],
     },
     execute: async (tfa, ctx, args) => {
         const storyPartsService = tfa.getModel<StoryPartService>('treasure-hunt.story-part')

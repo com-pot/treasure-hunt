@@ -4,9 +4,13 @@ import { PlayerProgressionEntity } from "../../model/player-progression";
 import { StoryPartService } from "../../model/story-part.service";
 
 export default defineConditionType({
-    arguments: {
-        part: {type: 'relation', target: 'treasure-hunt.story-part'},
-        interaction: {type: 'string', required: false, enum: ['reveal'] },
+    argumentsSchema: {
+        type: "object",
+        properties: {
+            part: {type: 'relation', target: 'treasure-hunt.story-part'},
+            interaction: {type: 'string', required: false, enum: ['reveal'] },
+        },
+        required: ["part", "interaction"],
     },
 
     evaluate: async (tfa, ctx, args, onError) => {

@@ -1,8 +1,15 @@
 import { defineActionType } from "../../../typeful-executive/executive"
 
 export default defineActionType({
-    arguments: {
-        duration: {type: 'number', description: "Duration in seconds"},
+    argumentsSchema: {
+        type: "object",
+        properties: {
+            duration: {
+                type: 'number', description: "Duration in seconds",
+                minimum: 1,
+            },
+        },
+        required: ["duration"],
     },
 
     execute: async (tfa, ctx, args, onError) => {

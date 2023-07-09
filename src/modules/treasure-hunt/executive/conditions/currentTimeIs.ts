@@ -12,13 +12,17 @@ const evaluators: Record<string, Evaluator> = {
 }
 
 export default defineConditionType({
-    arguments: {
-        operator: {
-            type: 'string', enum: ['eq', 'neq', 'lt', 'lte', 'gt', 'gte'],
+    argumentsSchema: {
+        type: "object",
+        properties: {
+            operator: {
+                type: 'string', enum: ['eq', 'neq', 'lt', 'lte', 'gt', 'gte'],
+            },
+            time: {
+                type: 'time',
+            },
         },
-        time: {
-            type: 'time',
-        },
+        required: ["operator", "time"],
     },
 
     evaluate: async (tfa, ctx, args, onError) => {

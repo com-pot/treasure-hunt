@@ -3,8 +3,12 @@ import { PlayerEntity } from "../../model/player";
 import { PlayerService } from "../../model/player.service";
 
 export default defineActionType({
-    arguments: {
-        itemName: {type: 'string'},
+    argumentsSchema: {
+        type: "object",
+        properties: {
+            itemName: {type: 'string'},
+        },
+        required: ["itemName"],
     },
 
     execute: async (tfa, ctx, args, onError) => {

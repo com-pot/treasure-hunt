@@ -9,9 +9,7 @@ export type ConditionEvaluationErrorHandler = (type: string, data: Record<string
 
 export type ConditionTypeController = {
     name: string,
-    arguments?: {
-        [name: string]: SchemaFieldSpec,
-    },
+    argumentsSchema?: SchemaFieldSpec & {type: "object"},
 
     evaluate: (tfa: TypefulAccessor, ctx: ActionContext, args: Record<string, unknown>, onError?: ConditionEvaluationErrorHandler) => boolean|Promise<boolean>,
 }
@@ -21,9 +19,7 @@ export const defineConditionType = <T extends ConditionTypeSpec>(type: T): T => 
 
 export type ActionTypeController<TArgs extends object = Record<string, unknown>, TOut = any> = {
     name: string,
-    arguments?: {
-        [name: string]: SchemaFieldSpec,
-    },
+    argumentsSchema?: SchemaFieldSpec & {type: "object"},
 
     execute: (tfa: TypefulAccessor, ctx: ActionContext, args: TArgs, onError?: ConditionEvaluationErrorHandler) => TOut|Promise<TOut>,
 }

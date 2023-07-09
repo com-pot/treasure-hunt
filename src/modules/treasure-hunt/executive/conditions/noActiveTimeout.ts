@@ -3,11 +3,15 @@ import { PlayerEntity } from "../../model/player";
 import { PlayerProgressionService } from "../../model/player-progression.service";
 
 export default defineConditionType({
-    arguments: {
-        status: {
-            type: 'string',
-            enum: ['any', 'cleared'],
-         }
+    argumentsSchema: {
+        type: "object",
+        properties: {
+            status: {
+                type: 'string',
+                enum: ['any', 'cleared'],
+            },
+        },
+        required: ["status"],
     },
     evaluate: async (tfa, ctx, args, onError) => {
         const player = ctx.player as PlayerEntity
