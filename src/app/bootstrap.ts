@@ -14,7 +14,7 @@ export const getModules = async (dir: string): Promise<Record<string, AppModule>
 
     const modules = await Promise.all(files.map(async (file) => {
         const moduleDir = path.dirname(file)
-        const name = path.parse(file).base.replace(/\.appModule\.(js|ts)$/, '')
+        const name = parseModuleName(file)
 
         const module = await importTypefulModule(file)
 
@@ -32,6 +32,21 @@ export const getModules = async (dir: string): Promise<Record<string, AppModule>
 
     return Object.fromEntries(modules)
 }
+
+export function parseModuleName(filePath: string): string {
+    const parts = path.parse(filePath)
+
+
+    return parseModuleNamespace(parts.dir) + parts.base.replace(/\.appModule\.(js|ts)$/, '')
+}
+function parseModuleNamespace(dir: string): string {
+    const iNamespace = dir.lastIndexOf("@")
+    if (iNamespace === -1) return ""
+
+    const iNamespaceEnd = dir.indexOf("/", iNamespace) + 1
+    return dir.substring(iNamespace, iNamespaceEnd)
+}
+
 async function importTypefulModule(file: string): Promise<TypefulModule> {
     let module = await import(file)
     if (module.default && Object.keys(module).length === 1) {
