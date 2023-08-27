@@ -13,15 +13,18 @@ import { createServiceContainer } from "./serviceContainer";
 import { loadFromFiles } from "./Config";
 import appLogger from "./appLogger";
 
-const logger = appLogger.child({name: "app"})
+const logger = appLogger.child({ name: "app" })
 
 
 export const createApp = async () => {
     logger.info("loading config")
     const config = await loadFromFiles(path.resolve(process.cwd(), 'src/config'))
     logger.info("crawling modules")
-    const modules = await getModules(path.resolve(process.cwd(), 'src/modules'))
-    logger.info("building service container")
+    const modules = {
+        ...await getModules(path.resolve(process.cwd(), 'src/modules')),
+        ...await getModules(path.resolve(process.cwd(), 'modules')),
+    }
+    logger.info({ modules: Object.keys(modules) }, "building service container")
     const serviceContainer = await createServiceContainer(modules, config)
 
     logger.info("composing app")
@@ -72,7 +75,7 @@ export const createApp = async () => {
     app.use(async (ctx, next) => {
         await next()
         if (ctx.status === 404 && (!ctx.body || ctx.body === "Not Found")) {
-            throw new AppError('not-found', 404, {reason: 'route-not-found'})
+            throw new AppError('not-found', 404, { reason: 'route-not-found' })
         }
     })
 
@@ -83,10 +86,10 @@ createApp()
     .then((app) => {
         const port = process.env.APP_PORT || 3000
         app.listen(port, () => {
-            logger.info("app listening", {port});
+            logger.info({ port }, "app listening");
         })
     })
     .catch((err) => {
-        logger.error({err});
+        logger.error({ err });
         process.exit(1)
     })
