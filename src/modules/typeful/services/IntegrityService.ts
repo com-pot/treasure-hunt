@@ -31,7 +31,7 @@ export default class IntegrityService {
             throw new AppError('typeful.unknown-type', 501, {specType: spec.type})
         }
 
-        if (spec.enum && spec.enum.includes(subject)) {
+        if (spec.enum && !spec.enum.includes(subject)) {
             scope?.pushError('non-enum-value')
             return false
         }
