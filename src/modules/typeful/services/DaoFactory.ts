@@ -1,6 +1,8 @@
-import AppError from "../../../app/AppError";
+import appLogger from "../../../app/appLogger";
 import { Dao } from "./dao/Daos"
 import { EntityConfigEntry } from "./EntityRegistry";
+
+const logger = appLogger.child({s: "DaoFactory"})
 
 export type DaoCreateFn = (config: EntityConfigEntry) => Partial<Dao>
 
@@ -30,13 +32,12 @@ export default class DaoFactory {
         const daoProxy = new Proxy(this.daoCreateFns[config.persistence](config), {
             get(t, p) {
                 if (!(p in t)) {
-                    return function unsupportedDaoOperation() {
-                        return Promise.reject(new AppError('not-implemented', 501, {
-                            subject: 'dao',
-                            key: config.meta.entityFqn,
-                            member: p,
-                        }))
-                    }
+                    logger.warn({
+                        subject: 'dao',
+                        key: config.meta.entityFqn,
+                        member: p,
+                    }, "illegal-dao-member-access")
+                    return undefined
                 }
 
                 return t[p as keyof Dao]
