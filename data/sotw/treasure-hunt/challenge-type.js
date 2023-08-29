@@ -1,5 +1,5 @@
 export default {
-    collection: [
+    items: [
         {
             type: 'anagram',
             params: {

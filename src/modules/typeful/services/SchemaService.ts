@@ -8,7 +8,7 @@ export default class SchemaService {
 
     constructor(private readonly integrityService: IntegrityService) {}
 
-    createFilterCriteria(ent: EntityConfigEntry, query: Record<string, string|string[]|undefined>|null, primaryKeyValue?: string|number): FilterCriteria|undefined {
+    createFilterCriteria(ent: Pick<EntityConfigEntry, "primaryKey" | "schema">, query: Record<string, string|string[]|undefined>|null, primaryKeyValue?: string|number): FilterCriteria|undefined {
         if (!query && !primaryKeyValue) {
             return
         }

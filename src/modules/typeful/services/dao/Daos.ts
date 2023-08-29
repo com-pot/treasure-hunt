@@ -1,5 +1,8 @@
 import { ActionContext } from "../../../../app/middleware/actionContext"
+import { PaginatedList } from "../../model/list"
 import { EntityInstance, EntityRef } from "../../typeful"
+
+export { PaginatedList }
 
 export type ArgumentValue = number | string | boolean | null | string[] | number[] | EntityRef | EntityRef[] | EntityInstance
 export type MatchObjectInfer = Record<string, ArgumentValue|Record<string, ArgumentValue>|Record<string, ArgumentValue>[]>
@@ -40,15 +43,8 @@ export type AggregationTask = MatchAggregation | GroupAggregation
 export type CreateRequest<T> = Partial<T>
 
 
-export type ListResult<T> = {
-    page: number,
-    perPage: number,
-    total: number,
-    items: T[],
-}
-
 export interface Dao<T extends EntityInstance = EntityInstance> {
-    list(action: ActionContext, filter?: FilterCriteria, sort?: SortOrder, pagination?: PaginationParam): Promise<ListResult<T>>
+    list(action: ActionContext, filter?: FilterCriteria, sort?: SortOrder, pagination?: PaginationParam): Promise<PaginatedList<T>>
     count(action: ActionContext, filter?: FilterCriteria): Promise<number>
     aggregate<TAggr=unknown>(action: ActionContext, aggregate: AggregationTask[]): Promise<TAggr[]>
 

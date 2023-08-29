@@ -1,8 +1,8 @@
 import vlmChallengeType from '../../sotw/treasure-hunt/challenge-type'
 
 export default {
-    collection: [
-        ...vlmChallengeType.collection,
+    items: [
+        ...vlmChallengeType.items,
         {
             type: 'shortCircuit',
         },

@@ -1,5 +1,5 @@
 export default {
-    collection: [
+    items: [
         {
             id: "sotw.ch-1.understand",
             name: "Pochop",

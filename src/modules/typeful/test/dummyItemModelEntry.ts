@@ -8,11 +8,12 @@ const dummyItemModelEntry: EntityConfigEntry = {
     primaryKey: 'id',
     persistence: 'dummy',
     meta: {
-        collectionFqn: 'dummy.items',
         entityFqn: 'dummy.item',
         name: 'item',
-        collectionName: 'items',
         module: 'dummy',
+        collections: {
+            default: {id: 'dummy.items'},
+        },
     },
     endpoints: {
         collection: 'dummies',

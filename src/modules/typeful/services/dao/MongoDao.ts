@@ -6,10 +6,10 @@ import { ActionContext } from "../../../../app/middleware/actionContext"
 import { EntityInstance, UniqueConstraint } from "../../typeful"
 import { EntityConfigEntry } from "../EntityRegistry"
 import IntegrityService, { createValidationScope } from "../IntegrityService"
-import { AggregationTask, CreateRequest, Dao, FilterCriteria, ListResult, PaginationParam, SortOrder } from "./Daos"
+import { AggregationTask, CreateRequest, Dao, FilterCriteria, PaginatedList, PaginationParam, SortOrder } from "./Daos"
 import mongoAggregators from "./mongoAggregators"
 
-type MongoDaoHook<T> = (instance: T) => void
+type MongoDaoHook<T> = (instance: T) => void | Promise<void>
 type MongoDaoHooks<T> = {
     beforeSave: MongoDaoHook<T>,
 }
@@ -22,7 +22,7 @@ export default class MongoDao<T extends EntityInstance> implements Dao<T> {
 
     }
 
-    async list(action: ActionContext, filter?: FilterCriteria, sort?: SortOrder, pagination?: PaginationParam): Promise<ListResult<T>> {
+    async list(action: ActionContext, filter?: FilterCriteria, sort?: SortOrder, pagination?: PaginationParam): Promise<PaginatedList<T>> {
         const page = pagination?.page || 1
         const perPage = pagination?.perPage || 10
         // FIXME: parameter validation shouldn't be handled at DAO level - move validation up
@@ -42,12 +42,15 @@ export default class MongoDao<T extends EntityInstance> implements Dao<T> {
         queryCursor.skip((page - 1) * perPage).limit(perPage)
 
         const items = await queryCursor.toArray() as T[]
-        const total = await this.collection.countDocuments(query)
+        const totalItems = await this.collection.countDocuments(query)
+        const totalPages = Math.ceil(totalItems / perPage)
 
         return {
-            page, perPage,
-            total,
             items,
+            page,
+            perPage,
+            totalItems,
+            totalPages,
         }
     }
     async count(action: ActionContext, filter?: FilterCriteria): Promise<number> {

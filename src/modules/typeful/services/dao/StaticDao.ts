@@ -4,7 +4,7 @@ import { get } from "lodash"
 
 import { ActionContext } from "../../../../app/middleware/actionContext"
 import { EntityInstance } from "../../typeful"
-import { Dao, FilterCriteria } from "./Daos"
+import { Dao, FilterCriteria, PaginatedList } from "./Daos"
 import { EntityConfigEntry } from "../EntityRegistry"
 import AppError from "../../../../app/AppError"
 
@@ -25,14 +25,15 @@ export default class StaticDao<T extends EntityInstance> implements Dao<T> {
         this.itemList = items
     }
 
-    async list(actionContext: ActionContext) {
+    async list(actionContext: ActionContext): Promise<PaginatedList<T>> {
         let items = await this.loadItems(actionContext)
 
         return {
+            items: items,
             page: 1,
             perPage: 0,
-            total: items.length,
-            items: items,
+            totalItems: items.length,
+            totalPages: 1,
         }
     }
 
@@ -90,7 +91,7 @@ export default class StaticDao<T extends EntityInstance> implements Dao<T> {
             data = data.default
         }
 
-        return data.collection
+        return data.items
     }
 }
 

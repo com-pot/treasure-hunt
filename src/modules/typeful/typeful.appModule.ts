@@ -2,7 +2,7 @@ import {MongoClient} from "mongodb"
 import Router from "@koa/router"
 import ensureJsonRequest from "../../app/middleware/ensureJsonRequest"
 
-import EntityRegistry, { EntityConfigEntry } from "./services/EntityRegistry"
+import EntityRegistry, { CollectionSpec, EntityConfigEntry } from "./services/EntityRegistry"
 import IntegrityService from "./services/IntegrityService"
 import TypeRegistry from "./services/TypeRegistry"
 
@@ -110,20 +110,6 @@ export const startUp = async (serviceContainer: ServiceContainer) => {
 
 function registerDaoController(ent: EntityConfigEntry, router: Router, ctrl: Dao, schemaService: SchemaService) {
     const endpoints = ent.endpoints
-    if (ctrl.list) {
-        router.get(endpoints.collection, async (ctx) => {
-            const filter = schemaService.createFilterCriteria(ent, ctx.query)
-            const pagination = createPaginationFromQuery(ctx.query)
-
-            const result = await ctrl.list(ctx.actionContext, filter, undefined, pagination)
-            ctx.set('coll-total', '' + result.total)
-            ctx.set('coll-page', '' + result.page)
-            ctx.set('coll-per-page', '' + result.perPage)
-
-            ctx.body = result.items
-        })
-    }
-
 
     if (ctrl.findOne) {
         router.get(endpoints.entityExact, async (ctx) => {
@@ -171,9 +157,75 @@ function registerDaoController(ent: EntityConfigEntry, router: Router, ctrl: Dao
     }
 }
 
+function staticEntityConfig(entity: Readonly<EntityConfigEntry>) {
+    const working = {...entity} as Partial<EntityConfigEntry>
+    delete working._plugins
+
+    return working as Omit<EntityConfigEntry, "_plugins">
+}
+function createCollectionsIndex(entities: EntityConfigEntry[]) {
+    const collectionIndex: Record<string, CollectionSpec & { entity: ReturnType<typeof staticEntityConfig> }> = {}
+    entities.forEach((entity) => {
+        const surplusCollections = Object.keys(entity.meta.collections).filter((id) => id !== "default")
+        if (surplusCollections.length) {
+            console.warn("Non-default collections not implemented on", {entity, surplusCollections})
+        }
+
+        const collection = entity.meta.collections.default
+        if (collectionIndex[collection.id]) {
+            console.warn("Collection already registered, skipping", {id: collection.id, entity})
+            return
+        }
+
+        collectionIndex[collection.id] = {
+            ...collection,
+            entity: staticEntityConfig(entity),
+        }
+    })
+
+    return collectionIndex
+}
+function createCollectionRouter(publicEntities: EntityConfigEntry[], tfa: TypefulAccessor, schemaService: SchemaService) {
+    const collectionIndex = createCollectionsIndex(publicEntities)
+    const router = new Router()
+
+    router.get("/collection/:id", (ctx) => {
+        const collection = collectionIndex[ctx.params.id]
+        if (!collection) {
+            throw new AppError('not-found', 404, { reason: 'collection-not-found', by: ["id"] })
+        }
+
+        ctx.body = collection
+    })
+
+    router.get("/collection/:id/items", async (ctx) => {
+        const collection = collectionIndex[ctx.params.id]
+        if (!collection) {
+            throw new AppError('not-found', 404, { reason: 'collection-not-found', by: ["id"] })
+        }
+
+        const ctrl = tfa.getDao(collection.entity.meta.entityFqn)
+        if (!ctrl?.list) {
+            throw new AppError('not-supported', 501, { reason: 'listing-not-available' })
+        }
+
+        const filter = schemaService.createFilterCriteria(collection.entity, ctx.query)
+        const pagination = createPaginationFromQuery(ctx.query)
+
+        ctx.body = await ctrl.list(ctx.actionContext, filter, undefined, pagination)
+    })
+
+    return router
+}
+
 function createBackstageRouter(publicEntities: EntityConfigEntry[], tfa: TypefulAccessor, schemaService: SchemaService) {
     const router = new Router()
     router.use(ensureJsonRequest())
+
+    const collectionsRouter = createCollectionRouter(publicEntities, tfa, schemaService)
+    collectionsRouter.prefix("/typeful")
+    router.use(collectionsRouter.routes())
+    router.use(collectionsRouter.allowedMethods())
 
     publicEntities
         .forEach((ent) => {

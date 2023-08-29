@@ -1,8 +1,8 @@
 import sotwChallengeType from '../../sotw/treasure-hunt/challenge-type'
 
 export default {
-    collection: [
-        ...sotwChallengeType.collection,
+    items: [
+        ...sotwChallengeType.items,
         {
             type: 'time-tables',
         },

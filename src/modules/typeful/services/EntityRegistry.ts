@@ -1,14 +1,13 @@
 import { createEntityEndpoints, EntityEndpoints } from "../model/model"
 import { EntityConfig, TypefulModule } from "../typeful"
 
-
+export type CollectionSpec = { id: string }
 export type EntityConfigEntry = Omit<EntityConfig, 'plural'> & {
     meta: {
         module: string,
         name: string,
-        collectionName: string,
         entityFqn: string,
-        collectionFqn: string,
+        collections: { default: CollectionSpec } & Record<string, CollectionSpec>,
     }
     persistence: NonNullable<EntityConfig['persistence']>
 
@@ -36,15 +35,17 @@ export default class EntityRegistry {
     }
 
     private registerEntity(moduleName: string, entityName: string, entity: EntityConfig): void {
-        const collectionName = entity.plural || entityName + 's'
+        const defaultCollectionId = `${moduleName}__${entity.plural || entityName + 's'}`
+            .replace(/[^\w\.]/g, () => "_")
 
         const meta: EntityConfigEntry['meta'] = {
             module: moduleName,
             name: entityName,
-            collectionName,
 
             entityFqn: `${moduleName}.${entityName}`,
-            collectionFqn: `${moduleName}.${collectionName}`,
+            collections: {
+                default: { id: defaultCollectionId },
+            },
         }
         const entry: EntityConfigEntry = {
             ...{...entity, plural: undefined},
@@ -52,11 +53,6 @@ export default class EntityRegistry {
             persistence: entity.persistence || 'mongo',
             endpoints: createEntityEndpoints(meta),
             primaryKey: entity.primaryKey || 'id',
-        }
-
-        if (entry.meta.entityFqn === entry.meta.collectionName) {
-            console.warn("Collection and entity resulted in same name: " + entry.meta.entityFqn + ". Ignoring");
-            return
         }
 
         this.entities.push(entry)

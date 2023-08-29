@@ -15,9 +15,14 @@ export default {
         meta: {
             module: {type: 'string'},
             name: {type: 'string'},
-            collectionName: {type: 'string'},
             entityFqn: {type: 'string'},
-            collectionFqn: {type: 'string'},
+            collections: {
+                type: "object",
+                properties: {
+                    default: {type: "string"},
+                },
+                additionalProperties: {type: "string"},
+            },
         },
         schema: { type: "object", additionalProperties: true, format: "json" },
     },
@@ -35,6 +40,6 @@ export function createEntityEndpoints(entMeta: EntityConfigEntry['meta']): Entit
     return {
         entityAny,
         entityExact: entityAny + '/:id',
-        collection: `/${entMeta.module}/${entMeta.collectionName}`,
+        collection: `/typeful/collection/${entMeta.collections.default.id}/items`,
     }
 }
