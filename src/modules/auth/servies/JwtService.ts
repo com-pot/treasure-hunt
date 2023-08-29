@@ -1,4 +1,5 @@
 import jsonwebtoken, {Algorithm, JwtPayload} from "jsonwebtoken"
+export { TokenExpiredError } from "jsonwebtoken"
 
 type JwtServiceOptions = {
     secret: string,

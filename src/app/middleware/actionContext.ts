@@ -2,7 +2,7 @@ import { Middleware, Request } from "koa/index"
 import { AuthTokenPayload } from "../../modules/auth/auth"
 import { UserEntity } from "../../modules/auth/model/user"
 
-import JwtService from "../../modules/auth/servies/JwtService"
+import JwtService, { TokenExpiredError } from "../../modules/auth/servies/JwtService"
 import TypefulAccessor from "../../modules/typeful/services/TypefulAccessor"
 import AppError from "../AppError"
 import appLogger from "../appLogger"
@@ -35,7 +35,12 @@ export default function actionContextFactory(jwtService: JwtService, tfa: Typefu
             const payload: AuthTokenPayload = jwtService.parseValid(token)
             actor = payload.login
         } catch (e: unknown) {
-            throw new AppError('token-invalid', 401, {message: (e as Error).message})
+            let reason = "unknown"
+            if (e instanceof TokenExpiredError) {
+                reason = "token-expired"
+                console.log(e)
+            }
+            throw new AppError('token-invalid', 401, {message: (e as Error).message, reason})
         }
 
         const users = tfa.getDao<UserEntity>('auth.user')

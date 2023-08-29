@@ -65,7 +65,7 @@ export default class AuthController {
         }
 
         if (!bcrypt.compareSync(pass, loginMethod.hash)) {
-            throw new AppError('invalid-credentials')
+            throw new AppError('invalid-credentials', 401)
         }
 
         const token = this.jwtService.create({login}, {duration: 7 * 24 * 60 * 1000})
