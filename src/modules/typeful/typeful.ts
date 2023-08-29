@@ -8,11 +8,13 @@ import { SortOrder } from "./services/dao/Daos"
 
 type EntityPluginModule = object | {create: (...args: any[]) => any } // eslint-disable-line @typescript-eslint/no-explicit-any
 export type UniqueConstraint = string
+export type StringifySpec = string | {template: string}
 
 export type EntitySpec = {
     plural?: string,
     persistence?: 'mongo' | 'static' | string,
     primaryKey?: string,
+    stringify?: StringifySpec,
 
     publish?: boolean,
 }

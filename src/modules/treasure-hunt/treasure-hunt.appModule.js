@@ -10,6 +10,9 @@ export const entities = {
     },
     story: {
         plural: 'stories',
+        stringify: {
+            template: '[{{key}}] {{title}}',
+        },
     },
     'story-part': {
         primaryKey: 'slug',
