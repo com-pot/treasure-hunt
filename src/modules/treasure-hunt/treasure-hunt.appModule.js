@@ -38,7 +38,14 @@ export const entities = {
         stringify: {
             template: '{{name}} [{{slug}}]',
         },
-    }
+    },
+
+    "player-timeout": {
+        publish: false,
+    },
+    _content: {
+        publish: false,
+    },
 }
 
 const createPlayerRouter = (serviceContainer) => {

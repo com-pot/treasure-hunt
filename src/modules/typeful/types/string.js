@@ -1,3 +1,5 @@
+const { uniqueId } = require("lodash")
+
 module.exports.default = {
     validate(value, options, scope) {
         if (typeof value !== "string") {
@@ -19,7 +21,11 @@ module.exports.default = {
 
         return true
     },
-    sanitize(value) {
+    sanitize(value, spec) {
+        if (!value && spec["x-gen"] === "id") {
+            return uniqueId()
+        }
+
         return '' + value
     },
 }

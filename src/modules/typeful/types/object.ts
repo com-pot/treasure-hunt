@@ -8,7 +8,7 @@ export type SchemaSpec = SchemaField & {
 type SchemaValue = Record<string, unknown>
 
 export const isSchemaSpec = (subj: SchemaField): subj is SchemaSpec => {
-    return subj.type === 'schema' && 'properties' in subj
+    return 'properties' in subj && !!subj.properties && typeof subj.properties === "object"
 }
 
 export default defineTypefulType<SchemaSpec>({

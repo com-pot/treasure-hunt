@@ -11,7 +11,9 @@ export type SchemaField = {
     [arg: string]: unknown,
 }
 
-export function getSchemaField(spec: SchemaSpec, path: string): SchemaField|undefined {
+export type RefPath = string[]
+
+export function getSchemaField(spec: SchemaSpec, path: RefPath | string): SchemaField|undefined {
     let result: SchemaField = spec
     for (let part of toPath(path)) {
         if (!result || !isSchemaSpec(result)) {

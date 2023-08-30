@@ -13,21 +13,8 @@ export const getModules = async (dir: string): Promise<Record<string, AppModule>
     })
 
     const modules = await Promise.all(files.map(async (file) => {
-        const moduleDir = path.dirname(file)
         const name = parseModuleName(file)
-
-        const module = await importTypefulModule(file)
-
-        module.entities = await initializeEntities(dir, moduleDir, module.entities)
-
-        module.entities && Object.entries(module.entities).forEach(([eName, config]) => {
-            if (!config.schema) {
-                appLogger.warn({module: name, entity: eName}, "Entity does not have schema specified");
-            }
-        })
-
-
-        return [name, module]
+        return [name, await importTypefulModule(dir, file)]
     }))
 
     return Object.fromEntries(modules)
@@ -35,7 +22,6 @@ export const getModules = async (dir: string): Promise<Record<string, AppModule>
 
 export function parseModuleName(filePath: string): string {
     const parts = path.parse(filePath)
-
 
     return parseModuleNamespace(parts.dir) + parts.base.replace(/\.appModule\.(js|ts)$/, '')
 }
@@ -47,13 +33,18 @@ function parseModuleNamespace(dir: string): string {
     return dir.substring(iNamespace, iNamespaceEnd)
 }
 
-async function importTypefulModule(file: string): Promise<TypefulModule> {
+async function importTypefulModule(dir: string, file: string): Promise<TypefulModule> {
     let module = await import(file)
     if (module.default && Object.keys(module).length === 1) {
         module = module.default
     }
 
-    return {...module} as TypefulModule
+    const moduleDir = path.dirname(file)
+
+    return {
+        ...module,
+        entities: await initializeEntities(dir, moduleDir, module.entities)
+    } as TypefulModule
 }
 
 const initializeEntities = async (cwd: string, moduleDir: string, entities?: Record<string, Partial<EntityConfig>>): Promise<Record<string, EntityConfig>> => {
@@ -94,30 +85,16 @@ const initializeEntities = async (cwd: string, moduleDir: string, entities?: Rec
         }
 
         initFilePromises.push(import(path).then((module) => {
-            if (!entity._plugins) {
-                logger.warn(`Failed to initialize module '${type}' on entity ${entityName}`)
-                return
-            }
-
             const moduleContent = module.default ?? module
             if (type === 'schema') {
                 entity.schema = moduleContent
             } else {
-                entity._plugins[type] = moduleContent
+                entity._plugins![type] = moduleContent
             }
         }))
     }
 
     await Promise.all(initFilePromises)
 
-    const validEntityEntries = Object.entries(entities)
-        .filter(([name, config]) => {
-            if (!config.schema) {
-                logger.warn({entity: name}, `Entity did not load properly, ignoring`);
-                return false
-            }
-            return true
-        }) as [string, EntityConfig][]
-
-    return Object.fromEntries(validEntityEntries)
+    return entities as Record<string, EntityConfig>
 }
