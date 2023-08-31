@@ -23,13 +23,15 @@ export default defineTypefulType<SchemaSpec>({
         let allOk = true
         let shallowValidation = false
 
+        const required = options.required as string[] || []
+
         for (const name in options.properties) {
             const fieldScope = scope?.withPath(name)
             const field = options.properties[name]
 
 
             if (!(name in obj)) {
-                if (!field.required) {
+                if (!required.includes(name)) {
                     continue
                 }
                 allOk = false

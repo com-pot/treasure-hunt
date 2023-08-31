@@ -7,9 +7,12 @@ describe('types/schema', function() {
         type: 'object',
         properties: {
             name: {type: 'string', defaultValue: 'document'},
-            format: {type: 'string', required: true},
+            format: {type: 'string'},
             pageCount: {type: 'number'},
         },
+        required: [
+            "format",
+        ],
     }
 
     describe('simple config - ' + typeSpec.stringify(schemaConfig), function() {
@@ -30,8 +33,9 @@ describe('types/schema', function() {
             stats: {
                 type: 'object',
                 properties: {
-                    createdAt: {type: 'string', required: true},
+                    createdAt: {type: 'string'},
                 },
+                required: ["createdAt"]
             },
         },
         required: ["stats"],
@@ -40,7 +44,6 @@ describe('types/schema', function() {
         const integrityService = typeSpec.createIntegrityService()
 
         const validValues = [
-            {},
             {stats: {createdAt: 'now'}},
             {stats: {createdAt: 'now', author: 'them'}},
         ]

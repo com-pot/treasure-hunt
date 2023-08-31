@@ -8,7 +8,7 @@ export default defineConditionType({
         type: "object",
         properties: {
             part: {type: 'relation', target: 'treasure-hunt.story-part'},
-            interaction: {type: 'string', required: false, enum: ['reveal'] },
+            interaction: {type: 'string', enum: ['reveal'] },
         },
         required: ["part", "interaction"],
     },

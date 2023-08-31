@@ -26,7 +26,7 @@ export default {
             items: action,
         },
 
-        // place: {...ClueLocation, required: false},
+        // place: {...ClueLocation},
 
         contentBlocks: {
             type: "array",

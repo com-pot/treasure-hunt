@@ -3,7 +3,6 @@ import { isSchemaSpec, SchemaSpec } from "./types/object";
 
 export type SchemaField = {
     type: string,
-    required?: boolean,
     defaultValue?: unknown,
 
     enum?: any[],
