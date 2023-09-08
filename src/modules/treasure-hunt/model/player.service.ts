@@ -1,18 +1,17 @@
 import AppError from "../../../app/AppError"
 import { ActionContext } from "../../../app/middleware/actionContext"
-import TypefulAccessor from "../../typeful/services/TypefulAccessor"
 import ModelService from "../../typeful/services/ModelService"
 import { PlayerEntity } from "./player"
 import { ObjectId } from "mongodb"
-import { EntityInstance } from "../../typeful/typeful"
+import { EntityInstance, defineModelPluginFactory } from "../../typeful/typeful"
 import { ClueEntity } from "./clue"
 
 type WithCurrentChallenge = {currentChallenge: number}
 type WithTrophy = {trophy: EntityInstance|null}
 
-export const create = (tfa: TypefulAccessor, model: string) => {
+export const create = defineModelPluginFactory((tfa, spec) => {
     return {
-        ...ModelService.create<PlayerEntity>(tfa, model),
+        ...ModelService.create<PlayerEntity>(tfa, spec),
 
         async createPlayer(action: ActionContext, user: string, story: string) {
             let player = await this.dao.findOne(action, {user, story})
@@ -75,6 +74,6 @@ export const create = (tfa: TypefulAccessor, model: string) => {
 
         }
     }
-}
+})
 
 export type PlayerService = ReturnType<typeof create>

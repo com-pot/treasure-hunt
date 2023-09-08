@@ -1,13 +1,13 @@
 import { ObjectId } from "mongodb";
 import { ActionContext } from "../../../app/middleware/actionContext";
 import ModelService from "../../typeful/services/ModelService";
-import { defineModelServiceFactory } from "../../typeful/typeful";
+import { defineModelPluginFactory } from "../../typeful/typeful";
 import { ConditionEvaluationErrorHandler, ConditionTypeController } from "../executive";
 import { ConditionEntity } from "./condition";
 
-export const create = defineModelServiceFactory((tfa, fqn) => {
+export const create = defineModelPluginFactory((tfa, spec) => {
     return {
-        ...ModelService.create<ConditionEntity>(tfa, fqn),
+        ...ModelService.create<ConditionEntity>(tfa, spec),
 
         /**
          * Evaluates condition using its argument and given action context

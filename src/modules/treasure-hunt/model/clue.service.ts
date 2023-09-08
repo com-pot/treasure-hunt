@@ -2,15 +2,15 @@ import { ActionContext } from "../../../app/middleware/actionContext";
 import { ActionModelService } from "../../typeful-executive/model/action.service";
 import { ConditionModelService } from "../../typeful-executive/model/condition.service";
 import ModelService from "../../typeful/services/ModelService";
-import TypefulAccessor from "../../typeful/services/TypefulAccessor";
+import { defineModelPluginFactory } from "../../typeful/typeful";
 import { ClueEntity } from "./clue";
 import { PlayerEntity } from "./player";
 import { StoryPartService } from "./story-part.service";
 import { TreasureHuntContentService } from "./_content.service";
 
-export const create = (tfa: TypefulAccessor, model: string) => {
+export const create = defineModelPluginFactory((tfa, spec) => {
     return {
-        ...ModelService.create<ClueEntity>(tfa, model),
+        ...ModelService.create<ClueEntity>(tfa, spec),
 
         async revealClue(action: ActionContext, clue: ClueEntity): Promise<ClueEntityWithResults> {
             const storyPartsService = tfa.getModel<StoryPartService>('treasure-hunt.story-part')
@@ -46,7 +46,7 @@ export const create = (tfa: TypefulAccessor, model: string) => {
             return clue
         },
     }
-}
+})
 
 type ClueEntityWithResults = ClueEntity & {
     revealResults: any[],

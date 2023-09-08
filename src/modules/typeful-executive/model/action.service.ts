@@ -2,13 +2,13 @@ import { ObjectId } from "mongodb";
 import AppError from "../../../app/AppError";
 import { ActionContext } from "../../../app/middleware/actionContext";
 import ModelService from "../../typeful/services/ModelService";
-import { defineModelServiceFactory } from "../../typeful/typeful";
+import { defineModelPluginFactory } from "../../typeful/typeful";
 import { ActionTypeController, ConditionEvaluationErrorHandler } from "../executive";
 import { ActionStruct } from "./action";
 
-export const create = defineModelServiceFactory((tfa, fqn) => {
+export const create = defineModelPluginFactory((tfa, spec) => {
     return {
-        ...ModelService.create(tfa, fqn),
+        ...ModelService.create(tfa, spec),
 
         async executeAction<TOut=any>(ctx: ActionContext, action: ActionStruct, onError?: ConditionEvaluationErrorHandler): Promise<TOut> {
             // for now, the _id is required for typing as static daos are not entirely

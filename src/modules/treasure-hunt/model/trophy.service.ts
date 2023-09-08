@@ -1,13 +1,13 @@
 import { ActionContext } from "../../../app/middleware/actionContext";
 import ModelService from "../../typeful/services/ModelService";
-import { defineModelServiceFactory, EntityRef } from "../../typeful/typeful";
+import { defineModelPluginFactory, EntityRef } from "../../typeful/typeful";
 import { PlayerEntity } from "./player";
 import { StoryEntity } from "./story";
 import { TrophyEntity } from "./trophy";
 
-export const create = defineModelServiceFactory((tfa, fqn) => {
+export const create = defineModelPluginFactory((tfa, spec) => {
     return {
-        ...ModelService.create<TrophyEntity>(tfa, fqn),
+        ...ModelService.create<TrophyEntity>(tfa, spec),
 
         async ensurePlayerHasTrophy(ctx: ActionContext, player: PlayerEntity, story: EntityRef<StoryEntity>): Promise<TrophyEntity> {
             let trophy = await this.dao.findOne(ctx, {player, story})

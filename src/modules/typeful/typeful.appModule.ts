@@ -64,7 +64,7 @@ export const compose = async (serviceContainer: ServiceContainer, config: Typefu
         for (const name of Object.keys(entity._plugins)) {
             const entityPlugin = entity._plugins[name]
             if (name === 'service' && 'create' in entityPlugin) {
-                entity._plugins.service = entityPlugin.create(serviceContainer.typefulAccessor, entity.meta.entityFqn)
+                entity._plugins.service = entityPlugin.create(serviceContainer.typefulAccessor, entity)
                 continue
             }
 

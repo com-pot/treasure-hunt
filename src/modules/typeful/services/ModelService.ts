@@ -1,11 +1,12 @@
 import { EntityInstance } from "../typeful";
 import { Dao } from "./dao/Daos";
+import { EntityConfigEntry } from "./EntityRegistry";
 
 import TypefulAccessor from "./TypefulAccessor";
 
-export const create = <TEnt extends EntityInstance>(tfa: TypefulAccessor, model: string): ModelService<TEnt> => {
+export const create = <TEnt extends EntityInstance>(tfa: TypefulAccessor, spec: EntityConfigEntry): ModelService<TEnt> => {
     return {
-        dao: tfa.getDao<TEnt>(model),
+        dao: tfa.getDao<TEnt>(spec.meta.entityFqn),
     }
 }
 

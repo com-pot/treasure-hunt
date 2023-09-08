@@ -1,10 +1,9 @@
 import { isNil } from "lodash";
-import { ObjectId } from "mongodb";
 import AppError from "../../../app/AppError";
 import { ActionContext } from "../../../app/middleware/actionContext";
 import { ActionModelService } from "../../typeful-executive/model/action.service";
 import ModelService from "../../typeful/services/ModelService";
-import TypefulAccessor from "../../typeful/services/TypefulAccessor";
+import { defineModelPluginFactory } from "../../typeful/typeful";
 import { CompleteStoryPartResult } from "../executive/actions/completeStoryPart";
 import { ChallengeEntity } from "./challenge";
 import { ClueEntity } from "./clue";
@@ -15,9 +14,9 @@ import { StoryPartEntity } from "./story-part";
 import { TrophyEntity } from "./trophy";
 import { TreasureHuntContentService } from "./_content.service";
 
-export const create = (tfa: TypefulAccessor, fqn: string) => {
+export const create = defineModelPluginFactory((tfa, spec) => {
     return {
-        ...ModelService.create<StoryPartEntity>(tfa, fqn),
+        ...ModelService.create<StoryPartEntity>(tfa, spec),
 
         // Lots of this is here from PlayerController. Progression-related stuff actually should be moved to
         //  some kind of transactional business service
@@ -159,7 +158,7 @@ export const create = (tfa: TypefulAccessor, fqn: string) => {
             return clue
         }
     }
-}
+})
 
 const chaseTagRegex = /chase\((?<storyPart>[\w\-\d]+)\)/
 function getChaseTag(clue: ClueEntity) {

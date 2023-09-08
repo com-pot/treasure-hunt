@@ -1,12 +1,13 @@
 import { ObjectId } from "mongodb"
 import { IntegrityContext, SanitizeOptions, ValidationScope } from "./services/IntegrityService"
-import { ModelService } from "./services/ModelService"
+import { EntityConfigEntry } from "./services/EntityRegistry"
 import TypefulAccessor from "./services/TypefulAccessor"
 import { SchemaSpec } from "./types/object"
 import { SortOrder } from "./services/dao/Daos"
 
 
-type EntityPluginModule = object | {create: (...args: any[]) => any } // eslint-disable-line @typescript-eslint/no-explicit-any
+export type EntityPluginFactory<T> = (tfa: TypefulAccessor, entity: EntityConfigEntry) => T
+export type EntityPluginModule = object | { create: EntityPluginFactory<unknown> } // eslint-disable-line @typescript-eslint/no-explicit-any
 export type UniqueConstraint = string
 export type StringifySpec = string | {template: string}
 
@@ -63,6 +64,6 @@ export type TypefulModule = {
 
 export const defineEntity = <T extends EntitySpec>(spec: T): T => spec
 
-export function defineModelServiceFactory<TEnt extends EntityInstance, TService extends ModelService<TEnt>>(factory: (tfa: TypefulAccessor, fqn: string) => TService) {
+export function defineModelPluginFactory<T>(factory: (tfa: TypefulAccessor, spec: EntityConfigEntry) => T) {
     return factory
 }

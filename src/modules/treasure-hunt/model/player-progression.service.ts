@@ -1,14 +1,14 @@
 import AppError from "../../../app/AppError";
 import { ActionContext } from "../../../app/middleware/actionContext";
 import ModelService from "../../typeful/services/ModelService";
-import TypefulAccessor from "../../typeful/services/TypefulAccessor";
+import { defineModelPluginFactory } from "../../typeful/typeful";
 import { PlayerEntity } from "./player";
 import { PlayerProgressionEntity } from "./player-progression";
 import { StoryPartEntity } from "./story-part";
 
-export const create = (tfa: TypefulAccessor, model: string) => {
+export const create = defineModelPluginFactory((tfa, spec) => {
     return {
-        ...ModelService.create<PlayerProgressionEntity>(tfa, model),
+        ...ModelService.create<PlayerProgressionEntity>(tfa, spec),
 
         async getProgression(action: ActionContext, player: PlayerEntity): Promise<PlayerProgressionEntity[]> {
             let progression = (await this.dao.list(action, {player}, undefined, {page: 1, perPage: 1000})).items
@@ -82,6 +82,6 @@ export const create = (tfa: TypefulAccessor, model: string) => {
             return items
         },
     }
-}
+})
 
 export type PlayerProgressionService = ReturnType<typeof create>
