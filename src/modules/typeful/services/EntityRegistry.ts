@@ -1,5 +1,5 @@
-import { createEntityEndpoints, EntityEndpoints } from "../model/model"
-import { EntityConfig, TypefulModule } from "../typeful"
+import { EntityEndpoints } from "../model/model"
+import { EntityConfig } from "../typeful"
 import appLogger from "../../../app/appLogger"
 import { Notice } from "../../../app/types/errors"
 import { getSchemaField } from "../typeSystem"
@@ -15,12 +15,12 @@ export type EntityConfigEntry = Omit<EntityConfig, 'plural'> & {
         entityFqn: string,
         collections: { default: CollectionSpec } & Record<string, CollectionSpec>,
     }
-    persistence: NonNullable<EntityConfig['persistence']>
+    persistence: NonNullable<EntityConfig['persistence']>,
 
     primaryKey: string,
     endpoints: EntityEndpoints,
 
-    stringify?: string | { template: string },
+    stringify?: EntityConfig["stringify"],
 }
 
 export default class EntityRegistry {
@@ -33,8 +33,8 @@ export default class EntityRegistry {
         this.entitiesIndex = {}
     }
 
-    registerModule(moduleName: string, module: TypefulModule): this {
-        module.entities && Object.entries(module.entities)
+    registerModule(moduleName: string, entities: Record<string, EntityConfig>): this {
+        entities && Object.entries(entities)
             .forEach(([entityName, entity]) => this.registerEntity(moduleName, entityName, entity))
 
         return this
@@ -118,3 +118,12 @@ const entityValidations: ((notices: ValidationNotice[], entity: EntityConfigEntr
     },
 ]
 
+export function createEntityEndpoints(entMeta: EntityConfigEntry['meta']): EntityEndpoints {
+    const entityAny = `/${entMeta.module}/${entMeta.name}`
+
+    return {
+        entityAny,
+        entityExact: entityAny + '/:id',
+        collection: `/typeful/collection/${entMeta.collections.default.id}/items`,
+    }
+}

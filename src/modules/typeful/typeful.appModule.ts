@@ -8,7 +8,7 @@ import TypeRegistry from "./services/TypeRegistry"
 
 import TypefulAccessor from "./services/TypefulAccessor"
 import { AppModule, ServiceContainer } from "../../app/types/app"
-import {TypefulModule } from "./typeful"
+import {EntityPluginModule, TypefulModule } from "./typeful"
 import AppError from "../../app/AppError"
 import { Dao, PaginationParam } from "./services/dao/Daos"
 import DaoFactory from "./services/DaoFactory"
@@ -49,7 +49,7 @@ export const compose = async (serviceContainer: ServiceContainer, config: Typefu
 
     const entityRegistry = new EntityRegistry()
     Object.entries(modules)
-        .forEach(([name, module]) => module.entities && entityRegistry.registerModule(name, module))
+        .forEach(([name, module]) => module.entities && entityRegistry.registerModule(name, module.entities))
     serviceContainer.entityRegistry = entityRegistry
 
     serviceContainer.integrityService = new IntegrityService(serviceContainer.typeRegistry)
@@ -64,7 +64,7 @@ export const compose = async (serviceContainer: ServiceContainer, config: Typefu
         for (const name of Object.keys(entity._plugins)) {
             const entityPlugin = entity._plugins[name]
             if (name === 'service' && 'create' in entityPlugin) {
-                entity._plugins.service = entityPlugin.create(serviceContainer.typefulAccessor, entity)
+                entity._plugins.service = entityPlugin.create(serviceContainer.typefulAccessor, entity) as EntityPluginModule
                 continue
             }
 

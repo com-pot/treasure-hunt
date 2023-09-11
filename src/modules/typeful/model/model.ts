@@ -1,4 +1,3 @@
-import { EntityConfigEntry } from "../services/EntityRegistry"
 import { SchemaSpec } from "../types/object"
 
 export default {
@@ -36,14 +35,4 @@ export type EntityEndpoints = {
     entityAny: string,
     entityExact: string,
     collection: string,
-}
-
-export function createEntityEndpoints(entMeta: EntityConfigEntry['meta']): EntityEndpoints {
-    const entityAny = `/${entMeta.module}/${entMeta.name}`
-
-    return {
-        entityAny,
-        entityExact: entityAny + '/:id',
-        collection: `/typeful/collection/${entMeta.collections.default.id}/items`,
-    }
 }
