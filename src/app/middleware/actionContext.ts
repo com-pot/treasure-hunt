@@ -80,7 +80,7 @@ export default function actionContextFactory(jwtService: JwtService, tfa: Typefu
             moment: getCurrentMoment(request.headers['time-travel']),
         }
 
-        if (devOptions?.devAuthCode === request.query.devAuth) {
+        if (devOptions?.devAuthCode && devOptions?.devAuthCode === request.query.devAuth) {
             actionContext.actor = actionContext.actor || 'anon-dev'
             actionContext.actorRoles.push('backstage')
         }
