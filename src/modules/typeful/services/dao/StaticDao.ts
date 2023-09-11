@@ -8,10 +8,11 @@ import { Dao, FilterCriteria, PaginatedList } from "./Daos"
 import { EntityConfigEntry } from "../EntityRegistry"
 import AppError from "../../../../app/AppError"
 
-
+type PickItemFn<T> = (ctx: ActionContext, item: T) => boolean
 export default class StaticDao<T extends EntityInstance> implements Dao<T> {
 
     private itemList: T[]|null = null
+    private getItemFilter: (ctx: ActionContext) => PickItemFn<T> = (ctx) => () => true
 
     constructor(private readonly config: EntityConfigEntry, private dataDirMask: string) {
 
@@ -24,9 +25,14 @@ export default class StaticDao<T extends EntityInstance> implements Dao<T> {
 
         this.itemList = items
     }
+    public overrideFilter(itemFilterGetter: (ctx: ActionContext) => PickItemFn<T>) {
+        this.getItemFilter = itemFilterGetter
+    }
 
     async list(actionContext: ActionContext): Promise<PaginatedList<T>> {
         let items = await this.loadItems(actionContext)
+        const pickItem = this.getItemFilter(actionContext)
+        items = items.filter((item) => pickItem(actionContext, item))
 
         return {
             items: items,

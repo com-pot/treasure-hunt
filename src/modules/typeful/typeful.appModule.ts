@@ -15,6 +15,7 @@ import DaoFactory from "./services/DaoFactory"
 import MongoDao from "./services/dao/MongoDao"
 import StaticDao from "./services/dao/StaticDao"
 import SchemaService from "./services/SchemaService"
+import { ActionContext } from "src/app/middleware/actionContext"
 
 const initMongoClient = async (mongoUrl: string) => {
     const client = new MongoClient(mongoUrl)
@@ -101,6 +102,27 @@ export const startUp = async (serviceContainer: ServiceContainer) => {
 
         return publicRepresentation
     }))
+
+    const scheduleModules = new Set([
+        "@compot/meets",
+        "@compot/locations",
+        "@compot/schedule",
+    ])
+    const sectionFilters = {
+        schedule: (_, item) => {
+            console.log(item)
+            return scheduleModules.has(item?.meta?.module)
+        },
+    } satisfies Record<string, (ctx: ActionContext, item: any) => boolean>
+
+    modelDao.overrideFilter((ctx) => {
+        if (ctx.actorRoles.includes("dataExpert")) return () => true
+        const q = ctx._q as Record<string, any> || {}
+        const filter = sectionFilters[q.section as keyof typeof sectionFilters]
+        if (!filter) return () => false
+
+        return filter
+    })
 
     return {
         backstageRouter: createBackstageRouter(publicEntities, typefulAccessor, serviceContainer.schemaService),
@@ -212,6 +234,7 @@ function createCollectionRouter(publicEntities: EntityConfigEntry[], tfa: Typefu
         const filter = schemaService.createFilterCriteria(collection.entity, ctx.query)
         const pagination = createPaginationFromQuery(ctx.query)
 
+        ctx.actionContext["_q"] = ctx.query
         ctx.body = await ctrl.list(ctx.actionContext, filter, undefined, pagination)
     })
 
