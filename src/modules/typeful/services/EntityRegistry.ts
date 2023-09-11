@@ -44,6 +44,8 @@ export default class EntityRegistry {
         const defaultCollectionId = `${moduleName}__${entity.plural || entityName + 's'}`
             .replace(/[^\w\.]/g, () => "_")
 
+        const primaryKey = entity.primaryKey || 'id'
+
         const meta: EntityConfigEntry['meta'] = {
             module: moduleName,
             name: entityName,
@@ -58,7 +60,10 @@ export default class EntityRegistry {
             meta,
             persistence: entity.persistence || 'mongo',
             endpoints: createEntityEndpoints(meta),
-            primaryKey: entity.primaryKey || 'id',
+            primaryKey,
+        }
+        if (!entry.schema.unique) {
+            entry.schema.unique = [primaryKey]
         }
 
         const notices = validateEntity(entry)

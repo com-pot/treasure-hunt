@@ -33,10 +33,6 @@ export default {
             items: TreasureHuntContentBlock,
         },
     },
-
-    unique: [
-        'slug',
-    ],
 }
 
 export type ClueEntity = EntityInstance & {
