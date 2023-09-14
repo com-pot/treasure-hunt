@@ -38,7 +38,7 @@ export default function actionContextFactory(jwtService: JwtService, tfa: Typefu
             let reason = "unknown"
             if (e instanceof TokenExpiredError) {
                 reason = "token-expired"
-                console.log(e)
+                console.error(e)
             }
             throw new AppError('token-invalid', 401, {message: (e as Error).message, reason})
         }

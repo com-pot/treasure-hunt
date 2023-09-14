@@ -110,7 +110,6 @@ export const startUp = async (serviceContainer: ServiceContainer) => {
     ])
     const sectionFilters = {
         schedule: (_, item) => {
-            console.log(item)
             return scheduleModules.has(item?.meta?.module)
         },
     } satisfies Record<string, (ctx: ActionContext, item: any) => boolean>
