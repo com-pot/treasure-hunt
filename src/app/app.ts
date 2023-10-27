@@ -54,6 +54,7 @@ export const createApp = async () => {
             paths: [
                 "backstage/typeful/collection/_compot_locations__Places/items",
                 "backstage/typeful/collection/_compot_schedule__Activities/items",
+                "backstage/typeful/collection/_compot_meets__QuickMessages/items",
                 "backstage/typeful/collection/_compot_schedule__ActivityOccurrences/items",
             ],
         })

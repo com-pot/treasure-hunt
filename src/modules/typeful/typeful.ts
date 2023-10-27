@@ -16,6 +16,7 @@ export type EntitySpec = {
     persistence?: 'mongo' | 'static' | string,
     primaryKey?: string,
     stringify?: StringifySpec,
+    defaultSort?: Record<string, 1 | -1>,
 
     publish?: boolean,
 }

@@ -7,4 +7,7 @@ export const entities: AppModule['entities'] = {
             template: "[{{ slug }}] {{ i18n:pick/title }}"
         },
     },
+    QuickMessage: {
+        defaultSort: { order: -1 },
+    },
 }
