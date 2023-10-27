@@ -9,5 +9,8 @@ export const entities: AppModule['entities'] = {
     },
     QuickMessage: {
         defaultSort: { order: 1 },
+        stringify: {
+            template: "[{{meet}}:{{order}}] {{id}}",
+        },
     },
 }
