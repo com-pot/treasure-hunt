@@ -8,6 +8,6 @@ export const entities: AppModule['entities'] = {
         },
     },
     QuickMessage: {
-        defaultSort: { order: -1 },
+        defaultSort: { order: 1 },
     },
 }
